@@ -1,5 +1,5 @@
-import React from 'react'
-import Topic from './topic'
+import React from 'react' // eslint-disable-line no-unused-vars
+import Topic from './Topic'
 import {Route, Link } from 'react-router-dom'
 
 
@@ -25,7 +25,7 @@ const Topics = ({ match }) => (
     </ul>
     <Route path={`${match.url}/:topicId`} component={Topic}/>
     <Route exact path={match.url} render={() => (
-     <h3>Please select a topic.</h3>
+      <h3>Please select a topic.</h3>
     )}/>
   </div>
 )
