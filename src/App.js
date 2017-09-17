@@ -4,10 +4,11 @@ import Home from './components/Home'
 import About from './components/About'
 import Topics from './components/Topics'
 import Country from './components/Country'
+import './App.css'
 
 const BasicExample = () => (
   <Router>
-    <div>
+    <div className="App">
       <ul>
         <li><Link to="/">Home</Link></li>
         <li><Link to="/country">Country</Link></li>
