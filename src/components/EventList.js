@@ -7,18 +7,30 @@ import Datetime from 'react-datetime'
 class EventList extends React.Component {
   constructor(props) {
     super(props)
-    const start = new Date()
-    let end = new Date()
-    end = new Date(end.setHours(end.getHours() + 5))
+    const start = moment()
+    const end = moment().add(24, 'hours')
 
     this.state = {
       events: [],
+      // start_time: null,
+      // end_time: null,
       start_time: start,
       end_time: end,
     }
   }
 
   componentDidMount() {
+    this.getEvents()
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    if (this.state.start_time !== nextState.start_time ||
+        this.state.end_time !== nextState.end_time) {
+      this.getEvents()
+    }
+  }
+
+  getEvents() {
     const {country_slug, region_slug, city_slug} = this.props.match.params
     const baseUrl = 'http://127.0.0.1:8000/events/events/'
     let url
@@ -34,7 +46,7 @@ class EventList extends React.Component {
     else {
       url = baseUrl
     }
-    url = `${url}?format=json&start_time=${this.state.start_time.getTime()}&end_time=${this.state.end_time.getTime()}`
+    url = `${url}?format=json&start_time=${this.state.start_time.unix()}&end_time=${this.state.end_time.unix()}`
     axios.get(url)
       .then(response =>{
         this.setState({events: response.data.results})
@@ -44,7 +56,6 @@ class EventList extends React.Component {
 
   renderEvents() {
     return this.state.events.map((event)=>{
-      console.log('moment', moment(event.start_time).fromNow(), event.start_time)
       return (
         <div key={event.facebook_id}>
           <h4>{event.name}</h4>
@@ -59,15 +70,29 @@ class EventList extends React.Component {
   }
 
 
+  onChange(variable, e) {
+    const obj = {}
+    obj[variable] = moment(e._d)
+    this.setState(obj)
+  }
+
   render() {
     const events = this.renderEvents()
     return (
-      <div>
+      <div className="event-list">
         <h3>Country: {this.props.match.params.country_slug}</h3>
         <h3>Region: {this.props.match.params.region_slug}</h3>
         <h3>City: {this.props.match.params.city_slug}</h3>
-        <Datetime />
-        <h3> EVENTS: {events} </h3>
+        <Datetime
+          defaultValue={this.state.start_time}
+          onBlur={(e)=>{this.onChange('start_time', e)}}
+        />
+        <Datetime
+          defaultValue={this.state.end_time}
+          onBlur={(e)=>{this.onChange('end_time', e)}}
+        />
+        <h3> Founds {this.state.events.length} EVENTS:</h3>
+        {events}
       </div>
     )
   }
