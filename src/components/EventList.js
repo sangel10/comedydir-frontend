@@ -4,8 +4,10 @@ import axios from 'axios'
 import moment from 'moment'
 import Datetime from 'react-datetime'
 import queryString from 'query-string'
-// import CustomGoogleMap from './CustomGoogleMap'
-import GoogleMapWithMarkers from './GoogleMapWithMarkers'
+import GoogleMapReact from 'google-map-react'
+import MapMarker from './MapMarker'
+
+// const MapMarker = ({ text }) => <div>{text}</div>
 
 class EventList extends React.Component {
   constructor(props) {
@@ -19,10 +21,11 @@ class EventList extends React.Component {
       // end_time: null,
       start_time: start,
       end_time: end,
-      latitude: null,
-      longitude: null,
+      latitude: 59.724465,
+      longitude: 30.080121,
+      selectedEvent: null,
     }
-    // this.getUserLocation = this.getUserLocation.bind(this)
+    this._onChildClick = this._onChildClick.bind(this)
   }
 
   componentDidMount() {
@@ -44,8 +47,7 @@ class EventList extends React.Component {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         }
-        console.log('GOT POSITION', pos)
-        this.setState({latitude: pos.lat, longitude: pos.lng})
+        this.setState({latitude: parseFloat(pos.lat, 10), longitude: parseFloat(pos.lng, 10)})
       }, () => {
         // handleLocationError(true, infoWindow, map.getCenter());
       })
@@ -53,7 +55,6 @@ class EventList extends React.Component {
   }
 
   getEvents() {
-    console.log('get events')
     const {country_slug, region_slug, city_slug} = this.props.match.params
     const baseUrl = 'http://127.0.0.1:8000/events/events/'
     const queryParams={}
@@ -75,10 +76,8 @@ class EventList extends React.Component {
     const params = queryString.stringify(queryParams)
     // url = `${url}?format=json&start_time=${this.state.start_time.unix()}&end_time=${this.state.end_time.unix()}`
     const url = `${baseUrl}?${params}`
-    console.log('URL', url)
     axios.get(url)
       .then(response =>{
-        console.log('EVENTs', response.data.results)
         this.setState({events: response.data.results})
       })
   }
@@ -106,8 +105,47 @@ class EventList extends React.Component {
     this.setState(obj)
   }
 
+  selectEvent(pk) {
+    console.log('select event')
+    this.setState({selectedEvent: pk})
+  }
+
+  getMarkers() {
+    return this.state.events.map(event=>{
+      return (
+        <MapMarker
+          key={event.pk}
+          lat={event.facebook_place.latitude}
+          lng={event.facebook_place.longitude}
+          name={event.name}
+          description={event.description}
+          isSelected={this.state.selectedEvent === event.pk}
+          onClick={()=> {this.selectEvent(event.pk)}}
+          eventData={event}
+        >
+          Hi
+        </MapMarker>
+      )
+    })
+  }
+  _onChildClick(key, childProps) {
+    console.log('child clicked')
+    const eventPk = childProps.eventData.pk
+    if (this.state.selectedEvent === eventPk) {
+      this.setState({selectedEvent: null})
+      return
+    }
+    this.setState({selectedEvent: eventPk})
+    // const index = this.props.events.findIndex(e => e.get('pk') === eventId)
+
+    // if (this.props.onChildClick) {
+    // this.props.onChildClick(index);
+    // }
+  }
+
   render() {
     const events = this.renderEvents()
+    const markers = this.getMarkers()
     return (
       <div className="event-list">
         <Datetime
@@ -123,17 +161,21 @@ class EventList extends React.Component {
         <div>Region</div>
         <div>Sort by: Start Time or Distance</div>
         <div>City</div>
-        <CustomGoogleMap />
-        <GoogleMapWithMarkers
-          googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
-          loadingElement={<div style={{ height: `100%` }} />}
-          containerElement={<div style={{ height: `400px` }} />}
-          mapElement={<div style={{ height: `100%` }} />}
-          centerLatitude={this.state.latitude}
-          centerLongitude={this.state.longitude}
-          events={this.state.events}
-        />
-
+        <div className="google-map-wrapper">
+          <GoogleMapReact
+            apiKey="AIzaSyCfEghEN8EUWO5-w6aEof1vnc5xSFJ0f3U"
+            center={{lat: this.state.latitude, lng: this.state.longitude}}
+            defaultZoom={1}
+            onChildClick={this._onChildClick}
+          >
+            {markers}
+            <MapMarker
+              lat={59.955413}
+              lng={30.337844}
+              name={'Kreyser Avrora'}
+            />
+          </GoogleMapReact>
+        </div>
         <h3> Found {this.state.events.length} EVENTS:</h3>
         {events}
       </div>

@@ -206,6 +206,10 @@ td.rdtYear:hover {
   height: 300px;
   width: auto; }
 
+.google-map-wrapper {
+  width: auto;
+  height: 500px; }
+
 .App {
   text-align: center; }
 
