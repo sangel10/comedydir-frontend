@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 import Datetime from 'react-datetime'
+import queryString from 'query-string'
+// import CustomGoogleMap from './CustomGoogleMap'
+import GoogleMapWithMarkers from './GoogleMapWithMarkers'
 
 class EventList extends React.Component {
   constructor(props) {
@@ -16,11 +19,15 @@ class EventList extends React.Component {
       // end_time: null,
       start_time: start,
       end_time: end,
+      latitude: null,
+      longitude: null,
     }
+    // this.getUserLocation = this.getUserLocation.bind(this)
   }
 
   componentDidMount() {
     this.getEvents()
+    this.getUserLocation()
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -30,25 +37,48 @@ class EventList extends React.Component {
     }
   }
 
+  getUserLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        var pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        }
+        console.log('GOT POSITION', pos)
+        this.setState({latitude: pos.lat, longitude: pos.lng})
+      }, () => {
+        // handleLocationError(true, infoWindow, map.getCenter());
+      })
+    }
+  }
+
   getEvents() {
+    console.log('get events')
     const {country_slug, region_slug, city_slug} = this.props.match.params
     const baseUrl = 'http://127.0.0.1:8000/events/events/'
-    let url
-    if (country_slug && region_slug && city_slug) {
-      url = `${baseUrl}country/${country_slug}/region/${region_slug}/city/${city_slug}`
+    const queryParams={}
+    if (city_slug) {
+      queryParams.region = city_slug
     }
-    else if (country_slug && region_slug) {
-      url = `${baseUrl}country/${country_slug}/region/${region_slug}`
+    if (region_slug) {
+      queryParams.region = region_slug
     }
-    else if (country_slug) {
-      url = `${baseUrl}country/${country_slug}`
+    if (country_slug) {
+      queryParams.country = country_slug
     }
-    else {
-      url = baseUrl
+    if (this.state.start_time) {
+      queryParams.start_time = this.state.start_time.unix()
     }
-    url = `${url}?format=json&start_time=${this.state.start_time.unix()}&end_time=${this.state.end_time.unix()}`
+    if (this.state.end_time) {
+      queryParams.end_time = this.state.end_time.unix()
+    }
+    const params = queryString.stringify(queryParams)
+    // url = `${url}?format=json&start_time=${this.state.start_time.unix()}&end_time=${this.state.end_time.unix()}`
+    const url = `${baseUrl}?${params}`
+    console.log('URL', url)
     axios.get(url)
       .then(response =>{
+        console.log('EVENTs', response.data.results)
         this.setState({events: response.data.results})
       })
   }
@@ -80,9 +110,6 @@ class EventList extends React.Component {
     const events = this.renderEvents()
     return (
       <div className="event-list">
-        <h3>Country: {this.props.match.params.country_slug}</h3>
-        <h3>Region: {this.props.match.params.region_slug}</h3>
-        <h3>City: {this.props.match.params.city_slug}</h3>
         <Datetime
           defaultValue={this.state.start_time}
           onBlur={(e)=>{this.onChange('start_time', e)}}
@@ -91,7 +118,23 @@ class EventList extends React.Component {
           defaultValue={this.state.end_time}
           onBlur={(e)=>{this.onChange('end_time', e)}}
         />
-        <h3> Founds {this.state.events.length} EVENTS:</h3>
+        <div>Radius</div>
+        <div>Country</div>
+        <div>Region</div>
+        <div>Sort by: Start Time or Distance</div>
+        <div>City</div>
+        <CustomGoogleMap />
+        <GoogleMapWithMarkers
+          googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
+          loadingElement={<div style={{ height: `100%` }} />}
+          containerElement={<div style={{ height: `400px` }} />}
+          mapElement={<div style={{ height: `100%` }} />}
+          centerLatitude={this.state.latitude}
+          centerLongitude={this.state.longitude}
+          events={this.state.events}
+        />
+
+        <h3> Found {this.state.events.length} EVENTS:</h3>
         {events}
       </div>
     )
