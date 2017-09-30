@@ -5,6 +5,7 @@ import moment from 'moment'
 import Datetime from 'react-datetime'
 import queryString from 'query-string'
 import GoogleMapReact from 'google-map-react'
+import GoogleMapWithMarkers from './GoogleMapWithMarkers'
 import MapMarker from './MapMarker'
 
 // const MapMarker = ({ text }) => <div>{text}</div>
@@ -169,12 +170,17 @@ class EventList extends React.Component {
             onChildClick={this._onChildClick}
           >
             {markers}
-            <MapMarker
-              lat={59.955413}
-              lng={30.337844}
-              name={'Kreyser Avrora'}
-            />
           </GoogleMapReact>
+          <GoogleMapWithMarkers
+            googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
+            loadingElement={<div style={{ height: `100%` }} />}
+            containerElement={<div style={{ height: `400px` }} />}
+            mapElement={<div style={{ height: `100%` }} />}
+            centerLatitude={this.state.latitude}
+            centerLongitude={this.state.longitude}
+            events={this.state.events}
+          />
+
         </div>
         <h3> Found {this.state.events.length} EVENTS:</h3>
         {events}

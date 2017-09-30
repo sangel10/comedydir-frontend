@@ -4,8 +4,7 @@ import PropTypes from 'prop-types'
 class MapMarker extends React.Component {
   render() {
     return (
-      <div>
-        EVENT
+      <div className="marker">
         {this.props.isSelected ? <div>{this.props.name} - {this.props.description}</div> : null}
       </div>
     )
