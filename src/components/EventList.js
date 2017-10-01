@@ -5,7 +5,6 @@ import moment from 'moment'
 import Datetime from 'react-datetime'
 import queryString from 'query-string'
 import GoogleMapReact from 'google-map-react'
-import GoogleMapWithMarkers from './GoogleMapWithMarkers'
 import MapMarker from './MapMarker'
 
 // const MapMarker = ({ text }) => <div>{text}</div>
@@ -13,8 +12,9 @@ import MapMarker from './MapMarker'
 class EventList extends React.Component {
   constructor(props) {
     super(props)
-    const start = moment()
-    const end = moment().add(24, 'hours')
+    const start = moment().subtract(30, 'days')
+    const end = moment().add(30, 'days')
+    // const end = moment().add(24, 'hours')
 
     this.state = {
       events: [],
@@ -48,6 +48,7 @@ class EventList extends React.Component {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         }
+        console.log('LOCATION', pos)
         this.setState({latitude: parseFloat(pos.lat, 10), longitude: parseFloat(pos.lng, 10)})
       }, () => {
         // handleLocationError(true, infoWindow, map.getCenter());
@@ -86,8 +87,13 @@ class EventList extends React.Component {
 
   renderEvents() {
     return this.state.events.map((event)=>{
+      const isActive = this.state.selectedEvent === event.pk
       return (
-        <div key={event.facebook_id}>
+        <div
+          key={event.facebook_id}
+          className={isActive ? 'is-active' : ''}
+          onClick={()=> {this.selectEvent(event.pk)}}
+        >
           <h4>{event.name}</h4>
           <img src={event.image_url} alt="event art"/>
           <div>{moment(event.start_time).format("dddd, MMMM Do YYYY, h:mm:ss a")}</div>
@@ -124,7 +130,6 @@ class EventList extends React.Component {
           onClick={()=> {this.selectEvent(event.pk)}}
           eventData={event}
         >
-          Hi
         </MapMarker>
       )
     })
@@ -143,7 +148,7 @@ class EventList extends React.Component {
     // this.props.onChildClick(index);
     // }
   }
-
+  // TODO: move API key to env
   render() {
     const events = this.renderEvents()
     const markers = this.getMarkers()
@@ -164,23 +169,17 @@ class EventList extends React.Component {
         <div>City</div>
         <div className="google-map-wrapper">
           <GoogleMapReact
-            apiKey="AIzaSyCfEghEN8EUWO5-w6aEof1vnc5xSFJ0f3U"
+            bootstrapURLKeys={{
+              key: 'AIzaSyCfEghEN8EUWO5-w6aEof1vnc5xSFJ0f3U',
+              language: 'en',
+            }}
+            callback="mycallback"
             center={{lat: this.state.latitude, lng: this.state.longitude}}
             defaultZoom={1}
             onChildClick={this._onChildClick}
           >
             {markers}
           </GoogleMapReact>
-          <GoogleMapWithMarkers
-            googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
-            loadingElement={<div style={{ height: `100%` }} />}
-            containerElement={<div style={{ height: `400px` }} />}
-            mapElement={<div style={{ height: `100%` }} />}
-            centerLatitude={this.state.latitude}
-            centerLongitude={this.state.longitude}
-            events={this.state.events}
-          />
-
         </div>
         <h3> Found {this.state.events.length} EVENTS:</h3>
         {events}
@@ -194,3 +193,8 @@ EventList.propTypes = {
 }
 
 export default EventList
+
+
+window.mycallback = function() {
+  console.log('callback ran')
+}
