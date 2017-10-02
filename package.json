@@ -5,6 +5,7 @@
   "dependencies": {
     "axios": "^0.16.2",
     "google-map-react": "^0.24.0",
+    "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "node-sass-chokidar": "0.0.3",
     "npm-run-all": "^4.1.1",

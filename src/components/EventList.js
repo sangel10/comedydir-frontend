@@ -6,7 +6,7 @@ import Datetime from 'react-datetime'
 import queryString from 'query-string'
 import GoogleMapReact from 'google-map-react'
 import MapMarker from './MapMarker'
-
+import _ from 'lodash'
 // const MapMarker = ({ text }) => <div>{text}</div>
 
 class EventList extends React.Component {
@@ -118,17 +118,32 @@ class EventList extends React.Component {
   }
 
   getMarkers() {
-    return this.state.events.map(event=>{
+    const places = []
+    this.state.events.forEach(event=>{
+      let index = _.findIndex(places, event.facebook_place)
+      if (index === -1) {
+        places.push(event.facebook_place)
+        places[places.length-1].events = []
+        index = places.length -1
+      }
+      places[index].events.push(event)
+    })
+    return places.map(place=>{
+      const description = place.events.map(event=>{
+        return `${event.name} - ${event.start_time}`
+      })
+      const descriptionString = description.join('')
+      // console.log('description', description)
       return (
         <MapMarker
-          key={event.pk}
-          lat={event.facebook_place.latitude}
-          lng={event.facebook_place.longitude}
-          name={event.name}
-          description={event.description}
-          isSelected={this.state.selectedEvent === event.pk}
-          onClick={()=> {this.selectEvent(event.pk)}}
-          eventData={event}
+          key={place.pk}
+          lat={place.latitude}
+          lng={place.longitude}
+          name={place.name}
+          description={descriptionString}
+          isSelected={this.state.selectedEvent === place.events[0].pk}
+          onClick={()=> {this.selectEvent(place.events[0].pk)}}
+          eventData={place.events[0]}
         >
         </MapMarker>
       )
