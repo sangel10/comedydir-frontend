@@ -25,6 +25,7 @@ class EventList extends React.Component {
       latitude: 59.724465,
       longitude: 30.080121,
       selectedEvent: null,
+      radius: 5000000,
     }
     this._onChildClick = this._onChildClick.bind(this)
   }
@@ -36,7 +37,8 @@ class EventList extends React.Component {
 
   componentWillUpdate(nextProps, nextState) {
     if (this.state.start_time !== nextState.start_time ||
-        this.state.end_time !== nextState.end_time) {
+        this.state.end_time !== nextState.end_time ||
+        this.state.radius !== nextState.radius) {
       this.getEvents()
     }
   }
@@ -57,17 +59,10 @@ class EventList extends React.Component {
   }
 
   getEvents() {
-    const {country_slug, region_slug, city_slug} = this.props.match.params
     const baseUrl = 'http://127.0.0.1:8000/events/events/'
     const queryParams={}
-    if (city_slug) {
-      queryParams.region = city_slug
-    }
-    if (region_slug) {
-      queryParams.region = region_slug
-    }
-    if (country_slug) {
-      queryParams.country = country_slug
+    if (this.state.radius) {
+      queryParams.radius = this.state.radius
     }
     if (this.state.start_time) {
       queryParams.start_time = this.state.start_time.unix()
@@ -75,8 +70,13 @@ class EventList extends React.Component {
     if (this.state.end_time) {
       queryParams.end_time = this.state.end_time.unix()
     }
+    if (this.state.latitude) {
+      queryParams.latitude = this.state.latitude
+    }
+    if (this.state.longitude) {
+      queryParams.longitude = this.state.longitude
+    }
     const params = queryString.stringify(queryParams)
-    // url = `${url}?format=json&start_time=${this.state.start_time.unix()}&end_time=${this.state.end_time.unix()}`
     const url = `${baseUrl}?${params}`
     axios.get(url)
       .then(response =>{
@@ -104,7 +104,6 @@ class EventList extends React.Component {
       )
     })
   }
-
 
   onChange(variable, e) {
     const obj = {}
@@ -134,6 +133,7 @@ class EventList extends React.Component {
       })
       const descriptionString = description.join('')
       // console.log('description', description)
+      // Selected event should be index, and we should compare vs selected event place
       return (
         <MapMarker
           key={place.pk}
@@ -149,6 +149,7 @@ class EventList extends React.Component {
       )
     })
   }
+
   _onChildClick(key, childProps) {
     console.log('child clicked')
     const eventPk = childProps.eventData.pk
@@ -157,11 +158,11 @@ class EventList extends React.Component {
       return
     }
     this.setState({selectedEvent: eventPk})
-    // const index = this.props.events.findIndex(e => e.get('pk') === eventId)
+  }
 
-    // if (this.props.onChildClick) {
-    // this.props.onChildClick(index);
-    // }
+  onRadiusChange(e) {
+    console.log('radius change,', e.target.value)
+    this.setState({radius: e.target.value})
   }
   // TODO: move API key to env
   render() {
@@ -178,6 +179,14 @@ class EventList extends React.Component {
           onBlur={(e)=>{this.onChange('end_time', e)}}
         />
         <div>Radius</div>
+        <input
+          type="range"
+          value={this.state.radius}
+          onChange={this.onRadiusChange.bind(this)}
+          max="1000000"
+          min="100"
+          step="100000"
+        />
         <div>Country</div>
         <div>Region</div>
         <div>Sort by: Start Time or Distance</div>
@@ -188,7 +197,6 @@ class EventList extends React.Component {
               key: 'AIzaSyCfEghEN8EUWO5-w6aEof1vnc5xSFJ0f3U',
               language: 'en',
             }}
-            callback="mycallback"
             center={{lat: this.state.latitude, lng: this.state.longitude}}
             defaultZoom={1}
             onChildClick={this._onChildClick}
@@ -208,8 +216,3 @@ EventList.propTypes = {
 }
 
 export default EventList
-
-
-window.mycallback = function() {
-  console.log('callback ran')
-}
