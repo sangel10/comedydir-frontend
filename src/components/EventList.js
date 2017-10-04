@@ -87,12 +87,12 @@ class EventList extends React.Component {
 
   renderEvents() {
     return this.state.events.map((event)=>{
-      const isActive = this.state.selectedEvent === event.pk
+      const isActive = this.state.selectedEvent === event
       return (
         <div
           key={event.facebook_id}
           className={isActive ? 'is-active' : ''}
-          onClick={()=> {this.selectEvent(event.pk)}}
+          onClick={()=> {this.selectEvent(event)}}
         >
           <h4>{event.name}</h4>
           <img src={event.image_url} alt="event art"/>
@@ -111,9 +111,9 @@ class EventList extends React.Component {
     this.setState(obj)
   }
 
-  selectEvent(pk) {
+  selectEvent(event) {
     console.log('select event')
-    this.setState({selectedEvent: pk})
+    this.setState({selectedEvent: event})
   }
 
   getMarkers() {
@@ -132,8 +132,7 @@ class EventList extends React.Component {
         return `${event.name} - ${event.start_time}`
       })
       const descriptionString = description.join('')
-      // console.log('description', description)
-      // Selected event should be index, and we should compare vs selected event place
+      const isSelected = this.state.selectedEvent && (_.findIndex(place.events, this.state.selectedEvent) !== -1)
       return (
         <MapMarker
           key={place.pk}
@@ -141,8 +140,8 @@ class EventList extends React.Component {
           lng={place.longitude}
           name={place.name}
           description={descriptionString}
-          isSelected={this.state.selectedEvent === place.events[0].pk}
-          onClick={()=> {this.selectEvent(place.events[0].pk)}}
+          isSelected={isSelected}
+          onClick={()=> {this.selectEvent(place.events[0])}}
           eventData={place.events[0]}
         >
         </MapMarker>
@@ -152,12 +151,12 @@ class EventList extends React.Component {
 
   _onChildClick(key, childProps) {
     console.log('child clicked')
-    const eventPk = childProps.eventData.pk
-    if (this.state.selectedEvent === eventPk) {
+    const eventData = childProps.eventData
+    if (this.state.selectedEvent === eventData) {
       this.setState({selectedEvent: null})
       return
     }
-    this.setState({selectedEvent: eventPk})
+    this.setState({selectedEvent: eventData})
   }
 
   onRadiusChange(e) {
@@ -169,28 +168,7 @@ class EventList extends React.Component {
     const events = this.renderEvents()
     const markers = this.getMarkers()
     return (
-      <div className="event-list">
-        <Datetime
-          defaultValue={this.state.start_time}
-          onBlur={(e)=>{this.onChange('start_time', e)}}
-        />
-        <Datetime
-          defaultValue={this.state.end_time}
-          onBlur={(e)=>{this.onChange('end_time', e)}}
-        />
-        <div>Radius</div>
-        <input
-          type="range"
-          value={this.state.radius}
-          onChange={this.onRadiusChange.bind(this)}
-          max="1000000"
-          min="100"
-          step="100000"
-        />
-        <div>Country</div>
-        <div>Region</div>
-        <div>Sort by: Start Time or Distance</div>
-        <div>City</div>
+      <div className="events-container">
         <div className="google-map-wrapper">
           <GoogleMapReact
             bootstrapURLKeys={{
@@ -204,8 +182,32 @@ class EventList extends React.Component {
             {markers}
           </GoogleMapReact>
         </div>
-        <h3> Found {this.state.events.length} EVENTS:</h3>
-        {events}
+        <div className="event-list">
+          <Datetime
+            defaultValue={this.state.start_time}
+            onBlur={(e)=>{this.onChange('start_time', e)}}
+          />
+          <Datetime
+            defaultValue={this.state.end_time}
+            onBlur={(e)=>{this.onChange('end_time', e)}}
+          />
+          <div>Radius</div>
+          <input
+            type="range"
+            value={this.state.radius}
+            onChange={this.onRadiusChange.bind(this)}
+            max="1000000"
+            min="100"
+            step="100000"
+          />
+          <div>Country</div>
+          <div>Region</div>
+          <div>Sort by: Start Time or Distance</div>
+          <div>City</div>
+          <h3> Found {this.state.events.length} EVENTS:</h3>
+          {events}
+
+        </div>
       </div>
     )
   }
