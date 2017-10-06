@@ -4,10 +4,12 @@ import axios from 'axios'
 import moment from 'moment'
 import Datetime from 'react-datetime'
 import queryString from 'query-string'
-import GoogleMapReact from 'google-map-react'
-import MapMarker from './MapMarker'
+// import GoogleMapReact from 'google-map-react'
+// import MapMarker from './MapMarker'
 import _ from 'lodash'
+import MapWithASearchBox from './MapWithASearchBox'
 // const MapMarker = ({ text }) => <div>{text}</div>
+import { Marker } from "react-google-maps"
 
 class EventList extends React.Component {
   constructor(props) {
@@ -133,18 +135,23 @@ class EventList extends React.Component {
       })
       const descriptionString = description.join('')
       const isSelected = this.state.selectedEvent && (_.findIndex(place.events, this.state.selectedEvent) !== -1)
+      // return (
+      //   <MapMarker
+      //     key={place.pk}
+      //     lat={place.latitude}
+      //     lng={place.longitude}
+      //     name={place.name}
+      //     description={descriptionString}
+      //     isSelected={isSelected}
+      //     onClick={()=> {this.selectEvent(place.events[0])}}
+      //     eventData={place.events[0]}
+      //   >
+      //   </MapMarker>
+      // )
+      const position = {lat: parseFloat(place.latitude), lng: parseFloat(place.longitude)}
+      console.log('marker position', position)
       return (
-        <MapMarker
-          key={place.pk}
-          lat={place.latitude}
-          lng={place.longitude}
-          name={place.name}
-          description={descriptionString}
-          isSelected={isSelected}
-          onClick={()=> {this.selectEvent(place.events[0])}}
-          eventData={place.events[0]}
-        >
-        </MapMarker>
+        <Marker key={place.pk} position={position} />
       )
     })
   }
@@ -170,17 +177,10 @@ class EventList extends React.Component {
     return (
       <div className="events-container">
         <div className="google-map-wrapper">
-          <GoogleMapReact
-            bootstrapURLKeys={{
-              key: 'AIzaSyCfEghEN8EUWO5-w6aEof1vnc5xSFJ0f3U',
-              language: 'en',
-            }}
-            center={{lat: this.state.latitude, lng: this.state.longitude}}
-            defaultZoom={1}
-            onChildClick={this._onChildClick}
-          >
+          <MapWithASearchBox
+            defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}>
             {markers}
-          </GoogleMapReact>
+          </MapWithASearchBox>
         </div>
         <div className="event-list">
           <Datetime
