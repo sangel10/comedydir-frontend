@@ -8,6 +8,7 @@ import queryString from 'query-string'
 // import MapMarker from './MapMarker'
 import _ from 'lodash'
 import MapWithASearchBox from './MapWithASearchBox'
+import MapSearch from './CustomMapWithASearchBox'
 // const MapMarker = ({ text }) => <div>{text}</div>
 import { Marker } from "react-google-maps"
 
@@ -170,17 +171,21 @@ class EventList extends React.Component {
     console.log('radius change,', e.target.value)
     this.setState({radius: e.target.value})
   }
-  // TODO: move API key to env
+  onBoundsChanged() {
+    console.log('BOUNDS CHANGEd')
+  }
   render() {
     const events = this.renderEvents()
     const markers = this.getMarkers()
     return (
       <div className="events-container">
         <div className="google-map-wrapper">
-          <MapWithASearchBox
-            defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}>
+          <MapSearch
+            defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
+            onBoundsChanged={this.onBoundsChanged}
+          >
             {markers}
-          </MapWithASearchBox>
+          </MapSearch>
         </div>
         <div className="event-list">
           <Datetime
