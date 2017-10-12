@@ -7,7 +7,7 @@ import queryString from 'query-string'
 // import GoogleMapReact from 'google-map-react'
 // import MapMarker from './MapMarker'
 import _ from 'lodash'
-import MapWithASearchBox from './MapWithASearchBox'
+// import MapWithASearchBox from './MapWithASearchBox'
 import MapSearch from './CustomMapWithASearchBox'
 // const MapMarker = ({ text }) => <div>{text}</div>
 import { Marker } from "react-google-maps"
@@ -29,6 +29,22 @@ class EventList extends React.Component {
       longitude: 30.080121,
       selectedEvent: null,
       radius: 5000000,
+      loadingEvents: false,
+      places: [],
+      getLocationFromEvents: () => {
+        const places = []
+        this.state.events.forEach(event=>{
+          let index = _.findIndex(places, event.facebook_place)
+          if (index === -1) {
+            places.push(event.facebook_place)
+            places[places.length-1].events = []
+            index = places.length -1
+          }
+          places[index].events.push(event)
+          this.setState({places: places})
+        })
+      }
+
     }
     this._onChildClick = this._onChildClick.bind(this)
   }
@@ -61,9 +77,10 @@ class EventList extends React.Component {
     }
   }
 
-  getEvents() {
+  getEvents(latitude, longitude) {
     const baseUrl = 'http://127.0.0.1:8000/events/events/'
     const queryParams={}
+    this.setState({loadingEvents: true})
     if (this.state.radius) {
       queryParams.radius = this.state.radius
     }
@@ -73,17 +90,19 @@ class EventList extends React.Component {
     if (this.state.end_time) {
       queryParams.end_time = this.state.end_time.unix()
     }
-    if (this.state.latitude) {
-      queryParams.latitude = this.state.latitude
-    }
-    if (this.state.longitude) {
-      queryParams.longitude = this.state.longitude
-    }
+    // if (this.state.latitude) {
+    queryParams.latitude = latitude || this.state.latitude || undefined
+    // }
+    // if (this.state.longitude) {
+    queryParams.longitude = longitude || this.state.longitude || undefined
+    // }
     const params = queryString.stringify(queryParams)
     const url = `${baseUrl}?${params}`
     axios.get(url)
       .then(response =>{
         this.setState({events: response.data.results})
+        this.state.getLocationFromEvents()
+        this.setState({loadingEvents: false})
       })
   }
 
@@ -120,39 +139,18 @@ class EventList extends React.Component {
   }
 
   getMarkers() {
-    const places = []
-    this.state.events.forEach(event=>{
-      let index = _.findIndex(places, event.facebook_place)
-      if (index === -1) {
-        places.push(event.facebook_place)
-        places[places.length-1].events = []
-        index = places.length -1
-      }
-      places[index].events.push(event)
-    })
-    return places.map(place=>{
-      const description = place.events.map(event=>{
-        return `${event.name} - ${event.start_time}`
-      })
-      const descriptionString = description.join('')
-      const isSelected = this.state.selectedEvent && (_.findIndex(place.events, this.state.selectedEvent) !== -1)
-      // return (
-      //   <MapMarker
-      //     key={place.pk}
-      //     lat={place.latitude}
-      //     lng={place.longitude}
-      //     name={place.name}
-      //     description={descriptionString}
-      //     isSelected={isSelected}
-      //     onClick={()=> {this.selectEvent(place.events[0])}}
-      //     eventData={place.events[0]}
-      //   >
-      //   </MapMarker>
-      // )
+    return this.state.places.map(place=>{
+      // const description = place.events.map(event=>{
+      //   return `${event.name} - ${event.start_time}`
+      // })
+      // const isSelected = this.state.selectedEvent && (_.findIndex(place.events, this.state.selectedEvent) !== -1)
       const position = {lat: parseFloat(place.latitude), lng: parseFloat(place.longitude)}
-      console.log('marker position', position)
       return (
-        <Marker key={place.pk} position={position} />
+        <Marker
+          key={place.pk}
+          position={position}
+          onClick={()=>{this.selectEvent(place.events[0])}}
+        />
       )
     })
   }
@@ -171,9 +169,26 @@ class EventList extends React.Component {
     console.log('radius change,', e.target.value)
     this.setState({radius: e.target.value})
   }
-  onBoundsChanged() {
-    console.log('BOUNDS CHANGEd')
+  //
+  // testing() {
+  //   console.log('test')
+  // }
+
+  // onBoundsChanged(bounds, center) {
+  //   console.log('BOUNDS CHANGEd', center.lat(), center.lng())
+  //   // this.setState({lat: center.lat(), lng: center.lng()})
+  // }
+
+  // onCenterChanged(e) {
+  //   console.log('center changed', e)
+  // }
+
+  onPlacesChanged(nextCenter) {
+    console.log('places changed, nextCenter', nextCenter)
+    this.setState({lat: nextCenter.lat(), lng: nextCenter.lng()})
+    this.getEvents(nextCenter.lat(), nextCenter.lng())
   }
+
   render() {
     const events = this.renderEvents()
     const markers = this.getMarkers()
@@ -182,7 +197,7 @@ class EventList extends React.Component {
         <div className="google-map-wrapper">
           <MapSearch
             defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
-            onBoundsChanged={this.onBoundsChanged}
+            onPlacesChanged={this.onPlacesChanged.bind(this)}
           >
             {markers}
           </MapSearch>
@@ -205,12 +220,12 @@ class EventList extends React.Component {
             min="100"
             step="100000"
           />
-          <div>Country</div>
-          <div>Region</div>
-          <div>Sort by: Start Time or Distance</div>
-          <div>City</div>
-          <h3> Found {this.state.events.length} EVENTS:</h3>
-          {events}
+          {this.state.loadingEvents ? 'Loading Events...' :
+            <div>
+              <h3> Found {this.state.events.length} EVENTS:</h3>
+              {events}
+            </div>
+          }
 
         </div>
       </div>
