@@ -17,6 +17,7 @@ export default class MapSearch extends React.Component {
     this.setState({
       markers: [],
       onMapMounted: map => {
+        this.props.onMapMounted()
         refs.map = map
       },
       onSearchBoxMounted: ref => {
@@ -65,10 +66,6 @@ export default class MapSearch extends React.Component {
     })
   }
 
-  onSubmit() {
-    'SUBMIT TO ME'
-  }
-
   render() {
     return (
       <GoogleMapsWrapper
@@ -77,7 +74,7 @@ export default class MapSearch extends React.Component {
         containerElement={<div style={{ height: `100%` }} />}
         mapElement={<div style={{ height: `100%` }} />}
         defaultZoom={12}
-        defaultCenter={{ lat: 37.7749, lng: -122.4194 }}
+        defaultCenter={this.props.defaultCenter}
         onMapMounted={this.state.onMapMounted}
         onBoundsChanged={this.state.onBoundsChanged}
         onCenterChanged={this.props.onCenterChanged}
@@ -87,7 +84,6 @@ export default class MapSearch extends React.Component {
           bounds={this.state.bounds}
           controlPosition={window.google && window.google.maps.ControlPosition.TOP_RIGHT}
           onPlacesChanged={this.state.onPlacesChanged}
-          onSubmit={this.onSubmit()}
         >
           <input
             type="text"

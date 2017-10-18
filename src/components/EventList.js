@@ -10,7 +10,11 @@ import _ from 'lodash'
 // import MapWithASearchBox from './MapWithASearchBox'
 import MapSearch from './CustomMapWithASearchBox'
 // const MapMarker = ({ text }) => <div>{text}</div>
-import { Marker } from "react-google-maps"
+import MarkerWithLabel from "react-google-maps/lib/components/addons/MarkerWithLabel"
+
+import Select from 'react-select'
+
+
 
 class EventList extends React.Component {
   constructor(props) {
@@ -54,10 +58,22 @@ class EventList extends React.Component {
     this.getUserLocation()
   }
 
+  addMarkerWithLabelScript () {
+    console.log('adding script')
+    if (window.MarkerWithLabel) {
+      return
+    }
+    const script = document.createElement("script")
+    script.src = "//cdn.rawgit.com/googlemaps/v3-utility-library/master/markerwithlabel/src/markerwithlabel.js"
+    script.async = true
+    document.body.appendChild(script)
+  }
+
   componentWillUpdate(nextProps, nextState) {
     if (this.state.start_time !== nextState.start_time ||
         this.state.end_time !== nextState.end_time ||
         this.state.radius !== nextState.radius) {
+      console.log('events in update');
       this.getEvents()
     }
   }
@@ -146,11 +162,20 @@ class EventList extends React.Component {
       // const isSelected = this.state.selectedEvent && (_.findIndex(place.events, this.state.selectedEvent) !== -1)
       const position = {lat: parseFloat(place.latitude), lng: parseFloat(place.longitude)}
       return (
-        <Marker
+        <MarkerWithLabel
           key={place.pk}
           position={position}
+          labelAnchor={position}
+          labelStyle={{
+            backgroundColor: "rgba(0,0,0,0.5)",
+            fontSize: "16 px",
+            padding: "5px",
+            color: "white"
+          }}
           onClick={()=>{this.selectEvent(place.events[0])}}
-        />
+        >
+          <div>{place.facebook_name} {moment(place.events[0].start_time).fromNow()}</div>
+        </MarkerWithLabel>
       )
     })
   }
@@ -169,6 +194,8 @@ class EventList extends React.Component {
     console.log('radius change,', e.target.value)
     this.setState({radius: e.target.value})
   }
+
+
   //
   // testing() {
   //   console.log('test')
@@ -192,12 +219,27 @@ class EventList extends React.Component {
   render() {
     const events = this.renderEvents()
     const markers = this.getMarkers()
+    // const selectOptions= [
+    //   1: 1,
+    //   2: 2,
+    //   3: 3,
+    //   7: 7,
+    //   30: 30,
+    // ]
+    const selectOptions = [
+      { value: '1', label: 1 },
+      { value: '2', label: 2 },
+      { value: '3', label: 3 },
+      { value: '7', label: 7 },
+      { value: '30', label: 30 },
+    ]
     return (
       <div className="events-container">
         <div className="google-map-wrapper">
           <MapSearch
             defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
             onPlacesChanged={this.onPlacesChanged.bind(this)}
+            onMapMounted={this.addMarkerWithLabelScript}
           >
             {markers}
           </MapSearch>
@@ -219,6 +261,14 @@ class EventList extends React.Component {
             max="1000000"
             min="100"
             step="100000"
+          />
+          Select Duration
+          <Select
+            name="form-field-name"
+            type="number"
+            value="1"
+            options={selectOptions}
+            onChange={this.updateSelect}
           />
           {this.state.loadingEvents ? 'Loading Events...' :
             <div>
