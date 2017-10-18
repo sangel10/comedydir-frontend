@@ -79,6 +79,7 @@ class EventList extends React.Component {
   }
 
   getUserLocation() {
+    console.log('get user location')
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         var pos = {
@@ -136,8 +137,7 @@ class EventList extends React.Component {
           <img src={event.image_url} alt="event art"/>
           <div>{moment(event.start_time).format("dddd, MMMM Do YYYY, h:mm:ss a")}</div>
           <div>{moment(event.start_time).fromNow()}</div>
-          <span>{event.facebook_place.facebook_city}</span>
-          <span>{event.facebook_place.facebook_country}</span>
+          <span>{event.facebook_place.facebook_city}, {event.facebook_place.facebook_country}</span>
         </div>
       )
     })
@@ -150,8 +150,22 @@ class EventList extends React.Component {
   }
 
   selectEvent(event) {
-    console.log('select event')
+    console.log('select event', event.pk, this.state.selectedEvent && this.state.selectedEvent.pk)
+    if (this.state.selectedEvent && (event.pk === this.state.selectedEvent.pk)) {
+      console.log('setting null')
+      this.setState({selectedEvent: null})
+      return
+    }
     this.setState({selectedEvent: event})
+  }
+
+  onLocationClick(place) {
+    console.log('click location', place)
+    this.setState({lat: place.latitude, lng: place.longitude})
+  }
+
+  onCenterChanged(e) {
+    console.log('update center', e)
   }
 
   getMarkers() {
@@ -159,7 +173,8 @@ class EventList extends React.Component {
       // const description = place.events.map(event=>{
       //   return `${event.name} - ${event.start_time}`
       // })
-      // const isSelected = this.state.selectedEvent && (_.findIndex(place.events, this.state.selectedEvent) !== -1)
+      const isSelected = this.state.selectedEvent && (_.findIndex(place.events, this.state.selectedEvent) !== -1)
+      console.log('selected', isSelected)
       const position = {lat: parseFloat(place.latitude), lng: parseFloat(place.longitude)}
       return (
         <MarkerWithLabel
@@ -172,9 +187,14 @@ class EventList extends React.Component {
             padding: "5px",
             color: "white"
           }}
-          onClick={()=>{this.selectEvent(place.events[0])}}
+          onClick={()=>{
+            this.selectEvent(place.events[0])
+            this.onLocationClick(place)
+          }}
         >
-          <div>{place.facebook_name} {moment(place.events[0].start_time).fromNow()}</div>
+          <div>{place.facebook_name} {moment(place.events[0].start_time).fromNow()}
+              {isSelected ? place.events[0].description : null}
+          </div>
         </MarkerWithLabel>
       )
     })
@@ -237,11 +257,16 @@ class EventList extends React.Component {
       <div className="events-container">
         <div className="google-map-wrapper">
           <MapSearch
-            defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
+            center={{lat: this.state.latitude, lng: this.state.longitude}}
             onPlacesChanged={this.onPlacesChanged.bind(this)}
+            onCenterChanged={this.onCenterChanged.bind(this)}
             onMapMounted={this.addMarkerWithLabelScript}
           >
             {markers}
+            <button className="my-location-button"
+              onClick={this.getUserLocation.bind(this)}>
+              My Location
+            </button>
           </MapSearch>
         </div>
         <div className="event-list">

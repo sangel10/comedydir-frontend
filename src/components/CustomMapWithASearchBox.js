@@ -74,7 +74,7 @@ export default class MapSearch extends React.Component {
         containerElement={<div style={{ height: `100%` }} />}
         mapElement={<div style={{ height: `100%` }} />}
         defaultZoom={12}
-        defaultCenter={this.props.defaultCenter}
+        center={this.props.center}
         onMapMounted={this.state.onMapMounted}
         onBoundsChanged={this.state.onBoundsChanged}
         onCenterChanged={this.props.onCenterChanged}
