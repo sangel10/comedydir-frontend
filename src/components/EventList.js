@@ -4,15 +4,19 @@ import axios from 'axios'
 import moment from 'moment'
 import Datetime from 'react-datetime'
 import queryString from 'query-string'
-// import GoogleMapReact from 'google-map-react'
-// import MapMarker from './MapMarker'
 import _ from 'lodash'
-// import MapWithASearchBox from './MapWithASearchBox'
-import MapSearch from './CustomMapWithASearchBox'
-// const MapMarker = ({ text }) => <div>{text}</div>
 import MarkerWithLabel from "react-google-maps/lib/components/addons/MarkerWithLabel"
 
 import Select from 'react-select'
+
+import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
+import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer"
+import SearchBox from "react-google-maps/lib/components/places/SearchBox"
+
+
+const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
+  return <GoogleMap {...props} ref={props.onMapMounted}>{props.children}</GoogleMap>
+}))
 
 
 
@@ -23,7 +27,9 @@ class EventList extends React.Component {
     const end = moment().add(30, 'days')
     // const end = moment().add(24, 'hours')
 
+    this.customRefs = {}
     this.state = {
+
       events: [],
       // start_time: null,
       // end_time: null,
@@ -47,10 +53,54 @@ class EventList extends React.Component {
           places[index].events.push(event)
           this.setState({places: places})
         })
-      }
+      },
+      markers: [],
+      onMapMounted: map => {
+        this.customRefs.map = map
+      },
+      onSearchBoxMounted: ref => {
+        this.customRefs.searchBox = ref
+      },
+      onBoundsChanged: () => {
+        // this.props.onBoundsChanged(refs.map.getBounds(), refs.map.getCenter())
+        // console.log(refs.map) // (not a Container, a Map) Map {props: {…}, context: {…}, refs: {…}, updater: {…}, _reactInternalFiber: FiberNode, …}
+        this.setState({
+          bounds: this.customRefs.map.getBounds(),
+          center: this.customRefs.map.getCenter()
+        })
+      },
+      onCenterChanged: () => {
+        // this.props.onBoundsChanged(refs.map.getBounds(), refs.map.getCenter())
+        // console.log(refs.map) // (not a Container, a Map) Map {props: {…}, context: {…}, refs: {…}, updater: {…}, _reactInternalFiber: FiberNode, …}
+        this.setState({
+          bounds: this.customRefs.map.getBounds(),
+          center: this.customRefs.map.getCenter()
+        })
+      },
+      onPlacesChanged: () => {
+        const places = this.customRefs.searchBox.getPlaces()
+        const bounds = new window.google.maps.LatLngBounds()
 
+        places.forEach(place => {
+          if (place.geometry.viewport) {
+            bounds.union(place.geometry.viewport)
+          }
+          else {
+            bounds.extend(place.geometry.location)
+          }
+        })
+        const nextMarkers = places.map(place => ({
+          position: place.geometry.location,
+        }))
+        const nextCenter = _.get(nextMarkers, '0.position', this.state.center)
+        this.setState({
+          center: nextCenter,
+          markers: nextMarkers,
+        })
+        this.customRefs.map.fitBounds(bounds)
+        this.getEvents(nextCenter.lat(), nextCenter.lng())
+      }
     }
-    this._onChildClick = this._onChildClick.bind(this)
   }
 
   componentDidMount() {
@@ -87,7 +137,11 @@ class EventList extends React.Component {
           lng: position.coords.longitude
         }
         console.log('LOCATION', pos)
-        this.setState({latitude: parseFloat(pos.lat, 10), longitude: parseFloat(pos.lng, 10)})
+        this.setState({
+          latitude: parseFloat(pos.lat, 10),
+          longitude: parseFloat(pos.lng, 10),
+          center: {lat: parseFloat(pos.lat, 10), lng: parseFloat(pos.lng, 10)}
+        })
       }, () => {
         // handleLocationError(true, infoWindow, map.getCenter());
       })
@@ -230,11 +284,11 @@ class EventList extends React.Component {
   //   console.log('center changed', e)
   // }
 
-  onPlacesChanged(nextCenter) {
-    console.log('places changed, nextCenter', nextCenter)
-    this.setState({lat: nextCenter.lat(), lng: nextCenter.lng()})
-    this.getEvents(nextCenter.lat(), nextCenter.lng())
-  }
+  // onPlacesChanged(nextCenter) {
+  //   console.log('places changed, nextCenter', nextCenter)
+  //   this.setState({lat: nextCenter.lat(), lng: nextCenter.lng()})
+  //   this.getEvents(nextCenter.lat(), nextCenter.lng())
+  // }
 
   render() {
     const events = this.renderEvents()
@@ -256,18 +310,56 @@ class EventList extends React.Component {
     return (
       <div className="events-container">
         <div className="google-map-wrapper">
-          <MapSearch
-            center={{lat: this.state.latitude, lng: this.state.longitude}}
-            onPlacesChanged={this.onPlacesChanged.bind(this)}
+          <GoogleMapsWrapper
+            googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCMh8-5D3mJSXspmJrhSTtt0ToGiA-JLBc&libraries=geometry,drawing,places" // libraries=geometry,drawing,places
+            loadingElement={<div style={{ height: `100%` }} />}
+            containerElement={<div style={{ height: `100%` }} />}
+            mapElement={<div style={{ height: `100%` }} />}
+            defaultZoom={12}
+            defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
+            center={this.state.center}
+            onMapMounted={this.state.onMapMounted}
+            onBoundsChanged={this.state.onBoundsChanged}
             onCenterChanged={this.onCenterChanged.bind(this)}
-            onMapMounted={this.addMarkerWithLabelScript}
           >
+            <SearchBox
+              ref={this.state.onSearchBoxMounted}
+              bounds={this.state.bounds}
+              controlPosition={window.google && window.google.maps.ControlPosition.TOP_RIGHT}
+              onPlacesChanged={this.state.onPlacesChanged}
+            >
+              <input
+                type="text"
+                placeholder="Enter your location"
+                style={{
+                  boxSizing: `border-box`,
+                  border: `1px solid transparent`,
+                  width: `240px`,
+                  height: `32px`,
+                  marginTop: `27px`,
+                  padding: `0 12px`,
+                  borderRadius: `3px`,
+                  boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                  fontSize: `14px`,
+                  outline: `none`,
+                  textOverflow: `ellipses`,
+                }}
+              />
+            </SearchBox>
+            <MarkerClusterer
+              averageCenter
+              enableRetinaIcons
+              gridSize={60}
+            >
+              {this.props.children}
+            </MarkerClusterer>
             {markers}
             <button className="my-location-button"
               onClick={this.getUserLocation.bind(this)}>
               My Location
             </button>
-          </MapSearch>
+          </GoogleMapsWrapper>
+
         </div>
         <div className="event-list">
           <Datetime
@@ -306,10 +398,6 @@ class EventList extends React.Component {
       </div>
     )
   }
-}
-
-EventList.propTypes = {
-  match: PropTypes.object,
 }
 
 export default EventList
