@@ -47,6 +47,9 @@ class EventList extends React.Component {
           }
           places[index].events.push(event)
           this.setState({places: places})
+          // TODO: this feels like the wrong location, but
+          // it doesn't seem to work when we call it from componentDidUpdate
+          this.fitBoundsToEvents()
         })
       },
       markers: [],
@@ -72,6 +75,7 @@ class EventList extends React.Component {
           center: this.customRefs.map.getCenter()
         })
       },
+
       onPlacesChanged: () => {
         const places = this.customRefs.searchBox.getPlaces()
         const bounds = new window.google.maps.LatLngBounds()
@@ -98,19 +102,38 @@ class EventList extends React.Component {
     }
   }
 
+
   componentDidMount() {
     this.getUserLocation()
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log('did update: start_time?', this.state.days !== prevState.days);
     if (this.state.start_time !== prevState.start_time ||
-        this.state.radius !== prevState.radius ||
-        this.state.days !== prevState.days) {
-        console.log('updated, getting events')
+      this.state.radius !== prevState.radius ||
+      this.state.days !== prevState.days) {
       this.getEvents()
     }
+    // This doesn't seem to work, it is not clear why!
+    // if (this.state.places !== prevState.places) {
+    //   this.fitBoundsToEvents('did update')
+    // }
   }
+
+
+  fitBoundsToEvents() {
+    if (!this.customRefs.map) {
+      return
+    }
+    const bounds = new window.google.maps.LatLngBounds()
+    this.state.places.forEach(place => {
+      const myPlace = new window.google.maps.LatLng(place.latitude, place.longitude)
+      bounds.extend(myPlace)
+    })
+    const center = new window.google.maps.LatLng(this.state.latitude, this.state.longitude)
+    bounds.extend(center)
+    this.customRefs.map.fitBounds(bounds)
+  }
+
 
   getUserLocation() {
     if (navigator.geolocation) {
@@ -119,7 +142,6 @@ class EventList extends React.Component {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         }
-        console.log('LOCATION', pos)
         this.setState({
           latitude: parseFloat(pos.lat, 10),
           longitude: parseFloat(pos.lng, 10),
@@ -170,10 +192,15 @@ class EventList extends React.Component {
           onClick={()=> {this.selectEvent(event)}}
         >
           <h4>{event.name}</h4>
-          <img src={event.image_url} alt="event art"/>
-          <div>{moment(event.start_time).format("dddd, MMMM Do YYYY, h:mm:ss a")}</div>
+          <div>@ {event.facebook_place.facebook_name}</div>
           <div>{moment(event.start_time).fromNow()}</div>
-          <span>{event.facebook_place.facebook_city}, {event.facebook_place.facebook_country}</span>
+          {!isActive ? null :
+            <div>
+              <img src={event.image_url} alt="event art"/>
+              <div>{moment(event.start_time).format("dddd, MMMM Do YYYY, h:mm:ss a")}</div>
+              <span>{event.facebook_place.facebook_city}, {event.facebook_place.facebook_country}</span>
+            </div>
+          }
         </div>
       )
     })
@@ -182,13 +209,12 @@ class EventList extends React.Component {
   onDatetimeChange(variable, e) {
     const obj = {}
     obj[variable] = moment(e._d)
+    console.log(moment(e._d))
     this.setState(obj)
   }
 
   selectEvent(event) {
-    console.log('select event', event.pk, this.state.selectedEvent && this.state.selectedEvent.pk)
     if (this.state.selectedEvent && (event.pk === this.state.selectedEvent.pk)) {
-      console.log('setting null')
       this.setState({selectedEvent: null})
       return
     }
@@ -236,15 +262,12 @@ class EventList extends React.Component {
     if (!e.value) {
       return
     }
-    console.log('update select', key, e)
     const obj = {}
     obj[key] = e.value
-    console.log('updating state', obj)
     this.setState(obj)
   }
 
   render() {
-    console.log('state', this.state)
     const events = this.renderEvents()
     const markers = this.getMarkers()
     const radiusSelectOptions = [
@@ -322,7 +345,8 @@ class EventList extends React.Component {
         <div className="event-list">
           <Datetime
             defaultValue={this.state.start_time}
-            onBlur={(e)=>{this.onDatetimeChange('start_time', e)}}
+            onChange={(e)=>{this.onDatetimeChange('start_time', e)}}
+            timeFormat={null}
           />
           Radius
           <Select
@@ -332,7 +356,7 @@ class EventList extends React.Component {
             options={radiusSelectOptions}
             onChange={(e)=>{this.updateSelect('radius', e)}}
           />
-          Select Days
+          Days
           <Select
             name="days-select"
             type="number"
