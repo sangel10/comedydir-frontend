@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 import Datetime from 'react-datetime'
@@ -24,21 +23,17 @@ class EventList extends React.Component {
   constructor(props) {
     super(props)
     const start = moment().subtract(30, 'days')
-    const end = moment().add(30, 'days')
-    // const end = moment().add(24, 'hours')
 
     this.customRefs = {}
     this.state = {
 
       events: [],
-      // start_time: null,
-      // end_time: null,
       start_time: start,
-      end_time: end,
       latitude: 59.724465,
       longitude: 30.080121,
       selectedEvent: null,
-      radius: 5000000,
+      radius: 10,
+      days: 1,
       loadingEvents: false,
       places: [],
       getLocationFromEvents: () => {
@@ -104,32 +99,20 @@ class EventList extends React.Component {
   }
 
   componentDidMount() {
-    this.getEvents()
     this.getUserLocation()
   }
 
-  addMarkerWithLabelScript () {
-    console.log('adding script')
-    if (window.MarkerWithLabel) {
-      return
-    }
-    const script = document.createElement("script")
-    script.src = "//cdn.rawgit.com/googlemaps/v3-utility-library/master/markerwithlabel/src/markerwithlabel.js"
-    script.async = true
-    document.body.appendChild(script)
-  }
-
-  componentWillUpdate(nextProps, nextState) {
-    if (this.state.start_time !== nextState.start_time ||
-        this.state.end_time !== nextState.end_time ||
-        this.state.radius !== nextState.radius) {
-      console.log('events in update');
+  componentDidUpdate(prevProps, prevState) {
+    console.log('did update: start_time?', this.state.days !== prevState.days);
+    if (this.state.start_time !== prevState.start_time ||
+        this.state.radius !== prevState.radius ||
+        this.state.days !== prevState.days) {
+        console.log('updated, getting events')
       this.getEvents()
     }
   }
 
   getUserLocation() {
-    console.log('get user location')
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         var pos = {
@@ -142,6 +125,7 @@ class EventList extends React.Component {
           longitude: parseFloat(pos.lng, 10),
           center: {lat: parseFloat(pos.lat, 10), lng: parseFloat(pos.lng, 10)}
         })
+        this.getEvents(parseFloat(pos.lat, 10), parseFloat(pos.lng, 10))
       }, () => {
         // handleLocationError(true, infoWindow, map.getCenter());
       })
@@ -158,14 +142,12 @@ class EventList extends React.Component {
     if (this.state.start_time) {
       queryParams.start_time = this.state.start_time.unix()
     }
-    if (this.state.end_time) {
-      queryParams.end_time = this.state.end_time.unix()
-    }
     // if (this.state.latitude) {
     queryParams.latitude = latitude || this.state.latitude || undefined
     // }
     // if (this.state.longitude) {
     queryParams.longitude = longitude || this.state.longitude || undefined
+    queryParams.days = this.state.days || 1
     // }
     const params = queryString.stringify(queryParams)
     const url = `${baseUrl}?${params}`
@@ -197,7 +179,7 @@ class EventList extends React.Component {
     })
   }
 
-  onChange(variable, e) {
+  onDatetimeChange(variable, e) {
     const obj = {}
     obj[variable] = moment(e._d)
     this.setState(obj)
@@ -224,11 +206,7 @@ class EventList extends React.Component {
 
   getMarkers() {
     return this.state.places.map(place=>{
-      // const description = place.events.map(event=>{
-      //   return `${event.name} - ${event.start_time}`
-      // })
       const isSelected = this.state.selectedEvent && (_.findIndex(place.events, this.state.selectedEvent) !== -1)
-      console.log('selected', isSelected)
       const position = {lat: parseFloat(place.latitude), lng: parseFloat(place.longitude)}
       return (
         <MarkerWithLabel
@@ -247,65 +225,45 @@ class EventList extends React.Component {
           }}
         >
           <div>{place.facebook_name} {moment(place.events[0].start_time).fromNow()}
-              {isSelected ? place.events[0].description : null}
+            {isSelected ? place.events[0].description : null}
           </div>
         </MarkerWithLabel>
       )
     })
   }
 
-  _onChildClick(key, childProps) {
-    console.log('child clicked')
-    const eventData = childProps.eventData
-    if (this.state.selectedEvent === eventData) {
-      this.setState({selectedEvent: null})
+  updateSelect(key, e) {
+    if (!e.value) {
       return
     }
-    this.setState({selectedEvent: eventData})
+    console.log('update select', key, e)
+    const obj = {}
+    obj[key] = e.value
+    console.log('updating state', obj)
+    this.setState(obj)
   }
-
-  onRadiusChange(e) {
-    console.log('radius change,', e.target.value)
-    this.setState({radius: e.target.value})
-  }
-
-
-  //
-  // testing() {
-  //   console.log('test')
-  // }
-
-  // onBoundsChanged(bounds, center) {
-  //   console.log('BOUNDS CHANGEd', center.lat(), center.lng())
-  //   // this.setState({lat: center.lat(), lng: center.lng()})
-  // }
-
-  // onCenterChanged(e) {
-  //   console.log('center changed', e)
-  // }
-
-  // onPlacesChanged(nextCenter) {
-  //   console.log('places changed, nextCenter', nextCenter)
-  //   this.setState({lat: nextCenter.lat(), lng: nextCenter.lng()})
-  //   this.getEvents(nextCenter.lat(), nextCenter.lng())
-  // }
 
   render() {
+    console.log('state', this.state)
     const events = this.renderEvents()
     const markers = this.getMarkers()
-    // const selectOptions= [
-    //   1: 1,
-    //   2: 2,
-    //   3: 3,
-    //   7: 7,
-    //   30: 30,
-    // ]
-    const selectOptions = [
-      { value: '1', label: 1 },
-      { value: '2', label: 2 },
-      { value: '3', label: 3 },
-      { value: '7', label: 7 },
-      { value: '30', label: 30 },
+    const radiusSelectOptions = [
+      { value: 0.5, label: '0.5', clearableValue: false},
+      { value: 1, label: '1', clearableValue: false},
+      { value: 2, label: '2', clearableValue: false},
+      { value: 3, label: '3', clearableValue: false},
+      { value: 5, label: '5', clearableValue: false},
+      { value: 10, label: '10', clearableValue: false},
+      { value: 50, label: '50', clearableValue: false},
+      { value: 100, label: '100', clearableValue: false},
+    ]
+    const daysSelectOptions = [
+      { value: 1, label: '1', clearableValue: false},
+      { value: 2, label: '2', clearableValue: false},
+      { value: 3, label: '3', clearableValue: false},
+      { value: 7, label: '7', clearableValue: false},
+      { value: 14, label: '14', clearableValue: false},
+      { value: 30, label: '30', clearableValue: false},
     ]
     return (
       <div className="events-container">
@@ -364,28 +322,23 @@ class EventList extends React.Component {
         <div className="event-list">
           <Datetime
             defaultValue={this.state.start_time}
-            onBlur={(e)=>{this.onChange('start_time', e)}}
+            onBlur={(e)=>{this.onDatetimeChange('start_time', e)}}
           />
-          <Datetime
-            defaultValue={this.state.end_time}
-            onBlur={(e)=>{this.onChange('end_time', e)}}
-          />
-          <div>Radius</div>
-          <input
-            type="range"
-            value={this.state.radius}
-            onChange={this.onRadiusChange.bind(this)}
-            max="1000000"
-            min="100"
-            step="100000"
-          />
-          Select Duration
+          Radius
           <Select
-            name="form-field-name"
+            name="radius-select"
             type="number"
-            value="1"
-            options={selectOptions}
-            onChange={this.updateSelect}
+            value={this.state.radius}
+            options={radiusSelectOptions}
+            onChange={(e)=>{this.updateSelect('radius', e)}}
+          />
+          Select Days
+          <Select
+            name="days-select"
+            type="number"
+            value={this.state.days}
+            options={daysSelectOptions}
+            onChange={(e)=>{this.updateSelect('days', e)}}
           />
           {this.state.loadingEvents ? 'Loading Events...' :
             <div>
