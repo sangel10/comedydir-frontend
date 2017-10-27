@@ -195,7 +195,7 @@ class EventList extends React.Component {
       return (
         <div
           key={event.facebook_id}
-          className={isActive ? 'is-active' : ''}
+          className={`event-${event.pk} ${isActive ? 'is-active' : ''}`}
           onClick={()=> {this.selectEvent(event)}}
         >
           <h4>{event.name}</h4>
@@ -232,8 +232,13 @@ class EventList extends React.Component {
   }
 
   onMarkerClick(place) {
-    console.log('click location', place)
     this.setState({lat: place.latitude, lng: place.longitude})
+    const eventClass = `event-${place.events[0].pk}`
+    const element = document.getElementsByClassName(eventClass)[0]
+    window.scrollTo({
+      'behavior': 'smooth',
+      'top': element.offsetTop + 100
+    })
   }
 
   onCenterChanged(e) {
@@ -260,8 +265,8 @@ class EventList extends React.Component {
             this.onMarkerClick(place)
           }}
         >
-          <div>{place.facebook_name} {moment(place.events[0].start_time).fromNow()}
-            {isSelected ? place.events[0].description : null}
+          <div>
+            {place.facebook_name} {moment(place.events[0].start_time).fromNow()}
           </div>
         </MarkerWithLabel>
       )
