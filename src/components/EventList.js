@@ -11,6 +11,7 @@ import Select from 'react-select'
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
 import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer"
 import SearchBox from "react-google-maps/lib/components/places/SearchBox"
+import PageControl from "./PageControl"
 
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
@@ -31,9 +32,14 @@ class EventList extends React.Component {
       start_time: start,
       latitude: 59.724465,
       longitude: 30.080121,
+      ordering: 'start_time',
       selectedEvent: null,
+      totalEvents: null,
       radius: 10,
+      limit: 50, // TODO: hardcoded for now, in the future find a way to get this from the API
       days: 1,
+      page: 1,
+      hasNextPage: false,
       loadingEvents: false,
       places: [],
       getLocationFromEvents: () => {
@@ -110,7 +116,10 @@ class EventList extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     if (this.state.start_time !== prevState.start_time ||
       this.state.radius !== prevState.radius ||
-      this.state.days !== prevState.days) {
+      this.state.days !== prevState.days ||
+      this.state.ordering !== prevState.ordering ||
+      this.state.page !== prevState.page
+    ) {
       this.getEvents()
     }
     // This doesn't seem to work, it is not clear why!
@@ -155,27 +164,25 @@ class EventList extends React.Component {
   }
 
   getEvents(latitude, longitude) {
+    this.setState({loadingEvents: true})
     const baseUrl = 'http://127.0.0.1:8000/events/events/'
     const queryParams={}
-    this.setState({loadingEvents: true})
-    if (this.state.radius) {
-      queryParams.radius = this.state.radius
-    }
-    if (this.state.start_time) {
-      queryParams.start_time = this.state.start_time.unix()
-    }
-    // if (this.state.latitude) {
+    queryParams.radius = this.state.radius || undefined
+    queryParams.start_time = this.state.start_time ? this.state.start_time.unix() : undefined
     queryParams.latitude = latitude || this.state.latitude || undefined
-    // }
-    // if (this.state.longitude) {
     queryParams.longitude = longitude || this.state.longitude || undefined
-    queryParams.days = this.state.days || 1
-    // }
+    queryParams.days = this.state.days || undefined
+    queryParams.page = this.state.page || undefined
+    queryParams.ordering = this.state.ordering || undefined
     const params = queryString.stringify(queryParams)
     const url = `${baseUrl}?${params}`
     axios.get(url)
       .then(response =>{
-        this.setState({events: response.data.results})
+        this.setState({
+          events: response.data.results,
+          hasNextPage: response.data.next !== null,
+          totalEvents: response.data.count
+        })
         this.state.getLocationFromEvents()
         this.setState({loadingEvents: false})
       })
@@ -199,6 +206,9 @@ class EventList extends React.Component {
               <img src={event.image_url} alt="event art"/>
               <div>{moment(event.start_time).format("dddd, MMMM Do YYYY, h:mm:ss a")}</div>
               <span>{event.facebook_place.facebook_city}, {event.facebook_place.facebook_country}</span>
+              <p>
+                {event.description}
+              </p>
             </div>
           }
         </div>
@@ -221,13 +231,13 @@ class EventList extends React.Component {
     this.setState({selectedEvent: event})
   }
 
-  onLocationClick(place) {
+  onMarkerClick(place) {
     console.log('click location', place)
     this.setState({lat: place.latitude, lng: place.longitude})
   }
 
   onCenterChanged(e) {
-    console.log('update center', e)
+    // console.log('update center', e)
   }
 
   getMarkers() {
@@ -247,7 +257,7 @@ class EventList extends React.Component {
           }}
           onClick={()=>{
             this.selectEvent(place.events[0])
-            this.onLocationClick(place)
+            this.onMarkerClick(place)
           }}
         >
           <div>{place.facebook_name} {moment(place.events[0].start_time).fromNow()}
@@ -259,12 +269,21 @@ class EventList extends React.Component {
   }
 
   updateSelect(key, e) {
-    if (!e.value) {
+    if (!e || !e.value) {
       return
     }
     const obj = {}
     obj[key] = e.value
+    // reset page when search params change
+    obj.page = 1
     this.setState(obj)
+  }
+
+
+  onPageChanged(newPage) {
+    this.setState({
+      page: newPage
+    })
   }
 
   render() {
@@ -279,6 +298,8 @@ class EventList extends React.Component {
       { value: 10, label: '10', clearableValue: false},
       { value: 50, label: '50', clearableValue: false},
       { value: 100, label: '100', clearableValue: false},
+      { value: 500, label: '500', clearableValue: false},
+      { value: 1000, label: '1000', clearableValue: false},
     ]
     const daysSelectOptions = [
       { value: 1, label: '1', clearableValue: false},
@@ -287,6 +308,10 @@ class EventList extends React.Component {
       { value: 7, label: '7', clearableValue: false},
       { value: 14, label: '14', clearableValue: false},
       { value: 30, label: '30', clearableValue: false},
+    ]
+    const orderingSelectOptions = [
+      { value: 'distance_from_target', label: 'Distance', clearableValue: false},
+      { value: 'start_time', label: 'Start time', clearableValue: false},
     ]
     return (
       <div className="events-container">
@@ -364,9 +389,23 @@ class EventList extends React.Component {
             options={daysSelectOptions}
             onChange={(e)=>{this.updateSelect('days', e)}}
           />
+          Order By
+          <Select
+            name="ordering-select"
+            type="number"
+            value={this.state.ordering}
+            options={orderingSelectOptions}
+            onChange={(e)=>{this.updateSelect('ordering', e)}}
+          />
+          <PageControl
+            totalPages={parseInt(this.state.totalEvents / this.state.limit, 10)}
+            currentPage={this.state.page}
+            hasNextPage={this.state.hasNextPage}
+            onClick={this.onPageChanged.bind(this)}
+          />
           {this.state.loadingEvents ? 'Loading Events...' :
             <div>
-              <h3> Found {this.state.events.length} EVENTS:</h3>
+              <h3> Found {this.state.totalEvents} EVENTS:</h3>
               {events}
             </div>
           }
