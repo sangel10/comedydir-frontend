@@ -196,7 +196,7 @@ class EventList extends React.Component {
         <div
           key={event.facebook_id}
           className={`event-${event.pk} ${isActive ? 'is-active' : ''}`}
-          onClick={()=> {this.selectEvent(event)}}
+          onClick={()=> {this.selectEvent(event); this.centerEvent(event)}}
         >
           <h4>{event.name}</h4>
           <div>@ {event.facebook_place.facebook_name}</div>
@@ -291,6 +291,15 @@ class EventList extends React.Component {
     })
   }
 
+  centerEvent(event) {
+    if (!this.customRefs.map) {
+      return
+    }
+    const place = event.facebook_place
+    const myPlace = new window.google.maps.LatLng(place.latitude, place.longitude)
+    this.setState({center: myPlace })
+  }
+
   render() {
     const events = this.renderEvents()
     const markers = this.getMarkers()
@@ -341,7 +350,7 @@ class EventList extends React.Component {
             >
               <input
                 type="text"
-                placeholder="Enter your location"
+                placeholder="Search For events near this location"
                 style={{
                   boxSizing: `border-box`,
                   border: `1px solid transparent`,
