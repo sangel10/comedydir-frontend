@@ -30,8 +30,6 @@ class EventList extends React.Component {
 
       events: [],
       start_time: start,
-      latitude: 59.724465,
-      longitude: 30.080121,
       ordering: 'start_time',
       selectedEvent: null,
       totalEvents: null,
@@ -138,8 +136,7 @@ class EventList extends React.Component {
       const myPlace = new window.google.maps.LatLng(place.latitude, place.longitude)
       bounds.extend(myPlace)
     })
-    const center = new window.google.maps.LatLng(this.state.latitude, this.state.longitude)
-    bounds.extend(center)
+    bounds.extend(this.state.center)
     this.customRefs.map.fitBounds(bounds)
   }
 
@@ -167,10 +164,15 @@ class EventList extends React.Component {
     this.setState({loadingEvents: true})
     const baseUrl = 'http://127.0.0.1:8000/events/events/'
     const queryParams={}
+    const lat = latitude || this.state.center.lat() || undefined
+    const lng = longitude || this.state.center.lng() || undefined
+    if (!lat || !lng) {
+      return
+    }
     queryParams.radius = this.state.radius || undefined
     queryParams.start_time = this.state.start_time ? this.state.start_time.unix() : undefined
-    queryParams.latitude = latitude || this.state.latitude || undefined
-    queryParams.longitude = longitude || this.state.longitude || undefined
+    queryParams.latitude = lat
+    queryParams.longitude = lng
     queryParams.days = this.state.days || undefined
     queryParams.page = this.state.page || undefined
     queryParams.ordering = this.state.ordering || undefined
@@ -336,7 +338,7 @@ class EventList extends React.Component {
             containerElement={<div style={{ height: `100%` }} />}
             mapElement={<div style={{ height: `100%` }} />}
             defaultZoom={12}
-            defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
+            defaultCenter={this.state.center}
             center={this.state.center}
             onMapMounted={this.state.onMapMounted}
             onBoundsChanged={this.state.onBoundsChanged}
