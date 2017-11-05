@@ -581,9 +581,12 @@ td.rdtYear:hover {
   display: flex; }
 
 .event-list {
-  width: 50vw;
-  width: 50%;
-  margin: 0; }
+  width: 33vw;
+  margin: 0;
+  float: right;
+  position: fixed;
+  top: 0;
+  background: rgba(255, 255, 255, 0.5); }
   .event-list img {
     width: 100%;
     height: auto; }

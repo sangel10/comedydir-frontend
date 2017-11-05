@@ -10,6 +10,7 @@ import Select from 'react-select'
 
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
 import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer"
+import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
 import SearchBox from "react-google-maps/lib/components/places/SearchBox"
 import PageControl from "./PageControl"
 
@@ -334,13 +335,13 @@ class EventList extends React.Component {
     ]
     return (
       <div className="events-container">
-        <div className="google-map-wrapper">
-          <GoogleMapsWrapper
-            googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCMh8-5D3mJSXspmJrhSTtt0ToGiA-JLBc&libraries=geometry,drawing,places" // libraries=geometry,drawing,places
-            loadingElement={<div style={{ height: `100%`, width: `50vw` }} >LOADING</div>}
-            containerElement={<div style={{ height: `100%`, width: `50vw` }} >CONTAINER</div>}
-            mapElement={<div style={{ height: `100%`, width: `50vw` }} >MAP</div>}
-          >
+        <GoogleMapsWrapper
+          googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCMh8-5D3mJSXspmJrhSTtt0ToGiA-JLBc&libraries=geometry,drawing,places" // libraries=geometry,drawing,places
+          loadingElement={<div style={{ height: `100vh`, width: `100vw` }} >LOADING</div>}
+          containerElement={<div style={{ height: `100vh`, width: `100vw` }} >CONTAINER</div>}
+          mapElement={<div style={{ height: `100vh`, width: `100vw`}} >MAP</div>}
+        >
+          <div className="google-map-wrapper">
             <GoogleMap
               defaultZoom={12}
               defaultCenter={this.state.center}
@@ -350,30 +351,6 @@ class EventList extends React.Component {
               onCenterChanged={this.onCenterChanged.bind(this)}
               ref={this.state.onMapMounted}
             >
-              <SearchBox
-                ref={this.state.onSearchBoxMounted}
-                bounds={this.state.bounds}
-                controlPosition={window.google && window.google.maps.ControlPosition.TOP_RIGHT}
-                onPlacesChanged={this.state.onPlacesChanged}
-              >
-                <input
-                  type="text"
-                  placeholder="Search For events near this location"
-                  style={{
-                    boxSizing: `border-box`,
-                    border: `1px solid transparent`,
-                    width: `240px`,
-                    height: `32px`,
-                    marginTop: `27px`,
-                    padding: `0 12px`,
-                    borderRadius: `3px`,
-                    boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
-                    fontSize: `14px`,
-                    outline: `none`,
-                    textOverflow: `ellipses`,
-                  }}
-                />
-              </SearchBox>
               <MarkerClusterer
                 averageCenter
                 enableRetinaIcons
@@ -387,52 +364,75 @@ class EventList extends React.Component {
                 My Location
               </button>
             </GoogleMap>
-          </GoogleMapsWrapper>
 
-        </div>
-        <div className="event-list">
-          <Datetime
-            defaultValue={this.state.start_time}
-            onChange={(e)=>{this.onDatetimeChange('start_time', e)}}
-          />
-          Radius
-          <Select
-            name="radius-select"
-            type="number"
-            value={this.state.radius}
-            options={radiusSelectOptions}
-            onChange={(e)=>{this.updateSelect('radius', e)}}
-          />
-          Days
-          <Select
-            name="days-select"
-            type="number"
-            value={this.state.days}
-            options={daysSelectOptions}
-            onChange={(e)=>{this.updateSelect('days', e)}}
-          />
-          Order By
-          <Select
-            name="ordering-select"
-            type="number"
-            value={this.state.ordering}
-            options={orderingSelectOptions}
-            onChange={(e)=>{this.updateSelect('ordering', e)}}
-          />
-          <PageControl
-            totalPages={parseInt(this.state.totalEvents / this.state.limit, 10)}
-            currentPage={this.state.page}
-            hasNextPage={this.state.hasNextPage}
-            onClick={this.onPageChanged.bind(this)}
-          />
-          {this.state.loadingEvents ? 'Loading Events...' :
-            <div>
-              <h3> Found {this.state.totalEvents} EVENTS:</h3>
-              {events}
-            </div>
-          }
+          </div>
+          <div className="event-list">
+            <StandaloneSearchBox
+              ref={this.state.onSearchBoxMounted}
+              bounds={this.state.bounds}
+              onPlacesChanged={this.state.onPlacesChanged}
+            >
+              <input
+                type="text"
+                placeholder="Search For events near this location"
+                style={{
+                  boxSizing: `border-box`,
+                  border: `1px solid transparent`,
+                  width: `240px`,
+                  height: `32px`,
+                  marginTop: `27px`,
+                  padding: `0 12px`,
+                  borderRadius: `3px`,
+                  boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                  fontSize: `14px`,
+                  outline: `none`,
+                  textOverflow: `ellipses`,
+                }}
+              />
+            </StandaloneSearchBox>
+            <Datetime
+              defaultValue={this.state.start_time}
+              onChange={(e)=>{this.onDatetimeChange('start_time', e)}}
+            />
+            Radius
+            <Select
+              name="radius-select"
+              type="number"
+              value={this.state.radius}
+              options={radiusSelectOptions}
+              onChange={(e)=>{this.updateSelect('radius', e)}}
+            />
+            Days
+            <Select
+              name="days-select"
+              type="number"
+              value={this.state.days}
+              options={daysSelectOptions}
+              onChange={(e)=>{this.updateSelect('days', e)}}
+            />
+            Order By
+            <Select
+              name="ordering-select"
+              type="number"
+              value={this.state.ordering}
+              options={orderingSelectOptions}
+              onChange={(e)=>{this.updateSelect('ordering', e)}}
+            />
+            <PageControl
+              totalPages={parseInt(this.state.totalEvents / this.state.limit, 10)}
+              currentPage={this.state.page}
+              hasNextPage={this.state.hasNextPage}
+              onClick={this.onPageChanged.bind(this)}
+            />
+            {this.state.loadingEvents ? 'Loading Events...' :
+              <div>
+                <h3> Found {this.state.totalEvents} EVENTS:</h3>
+                {events}
+              </div>
+            }
 
-        </div>
+          </div>
+        </GoogleMapsWrapper>
       </div>
     )
   }
