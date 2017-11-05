@@ -13,11 +13,9 @@ import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClust
 import SearchBox from "react-google-maps/lib/components/places/SearchBox"
 import PageControl from "./PageControl"
 
-
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
-  return <GoogleMap {...props} ref={props.onMapMounted}>{props.children}</GoogleMap>
+  return <div>{props.children}</div>
 }))
-
 
 
 class EventList extends React.Component {
@@ -61,6 +59,7 @@ class EventList extends React.Component {
         this.customRefs.map = map
       },
       onSearchBoxMounted: ref => {
+        console.log('SEARCH BOX MOUNTING', ref);
         this.customRefs.searchBox = ref
       },
       onBoundsChanged: () => {
@@ -131,10 +130,15 @@ class EventList extends React.Component {
     if (!this.customRefs.map) {
       return
     }
+    if (typeof !this.customRefs.map === 'undefined') {
+      return
+    }
     const bounds = new window.google.maps.LatLngBounds()
     this.state.places.forEach(place => {
-      const myPlace = new window.google.maps.LatLng(place.latitude, place.longitude)
-      bounds.extend(myPlace)
+      if (place.latitude && place.longitude) {
+        const myPlace = new window.google.maps.LatLng(place.latitude, place.longitude)
+        bounds.extend(myPlace)
+      }
     })
     bounds.extend(this.state.center)
     this.customRefs.map.fitBounds(bounds)
@@ -221,7 +225,6 @@ class EventList extends React.Component {
   onDatetimeChange(variable, e) {
     const obj = {}
     obj[variable] = moment(e._d)
-    console.log(moment(e._d))
     this.setState(obj)
   }
 
@@ -334,52 +337,56 @@ class EventList extends React.Component {
         <div className="google-map-wrapper">
           <GoogleMapsWrapper
             googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCMh8-5D3mJSXspmJrhSTtt0ToGiA-JLBc&libraries=geometry,drawing,places" // libraries=geometry,drawing,places
-            loadingElement={<div style={{ height: `100%` }} />}
-            containerElement={<div style={{ height: `100%` }} />}
-            mapElement={<div style={{ height: `100%` }} />}
-            defaultZoom={12}
-            defaultCenter={this.state.center}
-            center={this.state.center}
-            onMapMounted={this.state.onMapMounted}
-            onBoundsChanged={this.state.onBoundsChanged}
-            onCenterChanged={this.onCenterChanged.bind(this)}
+            loadingElement={<div style={{ height: `100%`, width: `50vw` }} >LOADING</div>}
+            containerElement={<div style={{ height: `100%`, width: `50vw` }} >CONTAINER</div>}
+            mapElement={<div style={{ height: `100%`, width: `50vw` }} >MAP</div>}
           >
-            <SearchBox
-              ref={this.state.onSearchBoxMounted}
-              bounds={this.state.bounds}
-              controlPosition={window.google && window.google.maps.ControlPosition.TOP_RIGHT}
-              onPlacesChanged={this.state.onPlacesChanged}
+            <GoogleMap
+              defaultZoom={12}
+              defaultCenter={this.state.center}
+              center={this.state.center}
+              onMapMounted={this.state.onMapMounted}
+              onBoundsChanged={this.state.onBoundsChanged}
+              onCenterChanged={this.onCenterChanged.bind(this)}
+              ref={this.state.onMapMounted}
             >
-              <input
-                type="text"
-                placeholder="Search For events near this location"
-                style={{
-                  boxSizing: `border-box`,
-                  border: `1px solid transparent`,
-                  width: `240px`,
-                  height: `32px`,
-                  marginTop: `27px`,
-                  padding: `0 12px`,
-                  borderRadius: `3px`,
-                  boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
-                  fontSize: `14px`,
-                  outline: `none`,
-                  textOverflow: `ellipses`,
-                }}
-              />
-            </SearchBox>
-            <MarkerClusterer
-              averageCenter
-              enableRetinaIcons
-              gridSize={60}
-            >
-              {this.props.children}
-            </MarkerClusterer>
-            {markers}
-            <button className="my-location-button"
-              onClick={this.getUserLocation.bind(this)}>
-              My Location
-            </button>
+              <SearchBox
+                ref={this.state.onSearchBoxMounted}
+                bounds={this.state.bounds}
+                controlPosition={window.google && window.google.maps.ControlPosition.TOP_RIGHT}
+                onPlacesChanged={this.state.onPlacesChanged}
+              >
+                <input
+                  type="text"
+                  placeholder="Search For events near this location"
+                  style={{
+                    boxSizing: `border-box`,
+                    border: `1px solid transparent`,
+                    width: `240px`,
+                    height: `32px`,
+                    marginTop: `27px`,
+                    padding: `0 12px`,
+                    borderRadius: `3px`,
+                    boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                    fontSize: `14px`,
+                    outline: `none`,
+                    textOverflow: `ellipses`,
+                  }}
+                />
+              </SearchBox>
+              <MarkerClusterer
+                averageCenter
+                enableRetinaIcons
+                gridSize={60}
+              >
+                {this.props.children}
+              </MarkerClusterer>
+              {markers}
+              <button className="my-location-button"
+                onClick={this.getUserLocation.bind(this)}>
+                My Location
+              </button>
+            </GoogleMap>
           </GoogleMapsWrapper>
 
         </div>
@@ -387,7 +394,6 @@ class EventList extends React.Component {
           <Datetime
             defaultValue={this.state.start_time}
             onChange={(e)=>{this.onDatetimeChange('start_time', e)}}
-            timeFormat={null}
           />
           Radius
           <Select
