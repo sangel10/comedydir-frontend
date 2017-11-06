@@ -580,13 +580,28 @@ td.rdtYear:hover {
   overflow-x: hidden;
   display: flex; }
 
+.event-controls {
+  position: absolute;
+  width: 100%;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.8); }
+
+.event-list__container {
+  position: relative;
+  height: 100vh;
+  overflow: auto; }
+
+.event-list__items {
+  margin-top: 300px; }
+
 .event-list {
   width: 33vw;
   margin: 0;
   float: right;
   position: fixed;
   top: 0;
-  background: rgba(255, 255, 255, 0.5); }
+  background: rgba(255, 255, 255, 0.5);
+  height: 100%; }
   .event-list img {
     width: 100%;
     height: auto; }
