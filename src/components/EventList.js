@@ -11,7 +11,6 @@ import Select from 'react-select'
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
 import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer"
 import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
-import SearchBox from "react-google-maps/lib/components/places/SearchBox"
 import PageControl from "./PageControl"
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
@@ -60,7 +59,6 @@ class EventList extends React.Component {
         this.customRefs.map = map
       },
       onSearchBoxMounted: ref => {
-        console.log('SEARCH BOX MOUNTING', ref);
         this.customRefs.searchBox = ref
       },
       onBoundsChanged: () => {
@@ -108,7 +106,37 @@ class EventList extends React.Component {
 
 
   componentDidMount() {
-    this.getUserLocation()
+    // this.getUserLocation()
+    const params = queryString.parse(window.location.search)
+    const nextState = {}
+    if (!params.latitude || !params.longitude) {
+      console.log('NO LAT AND LNG')
+      this.getUserLocation()
+      return
+    }
+    // nextState.center = {
+    //   lat: ()=>{
+    //     parseInt(params.latitude, 10)
+    //   },
+    //   lng: ()=>{
+    //     parseInt(params.longitude, 10)
+    //   }
+    // }
+    nextState.center = {
+      lat: parseFloat(params.latitude, 10),
+      lng: parseFloat(params.longitude, 10),
+    }
+    // nextState.center = {lat: parseInt(params.latitude, 10), lng: parseInt(params.longitude, 10)}
+    // nextState.center = new window.google.maps.LatLng(params.latitude, params.longitude)
+    nextState.page = parseInt(params.page, 10) || undefined
+    nextState.days = parseInt(params.days, 10) || undefined
+    nextState.radius = parseFloat(params.radius) || undefined
+    nextState.ordering = params.ordering || undefined
+    nextState.start_time = params.start_time ? moment(parseInt(params.start_time, 10)) : undefined
+    const cleanNextState = _.omitBy(nextState, _.isUndefined)
+    console.log('CLEAN STATE', cleanNextState)
+    this.setState(cleanNextState)
+    // this.getEvents(params.latitude, params.longitude)
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -154,8 +182,6 @@ class EventList extends React.Component {
           lng: position.coords.longitude
         }
         this.setState({
-          latitude: parseFloat(pos.lat, 10),
-          longitude: parseFloat(pos.lng, 10),
           center: {lat: parseFloat(pos.lat, 10), lng: parseFloat(pos.lng, 10)}
         })
         this.getEvents(parseFloat(pos.lat, 10), parseFloat(pos.lng, 10))
@@ -169,8 +195,11 @@ class EventList extends React.Component {
     this.setState({loadingEvents: true})
     const baseUrl = 'http://127.0.0.1:8000/events/events/'
     const queryParams={}
-    const lat = latitude || this.state.center.lat() || undefined
-    const lng = longitude || this.state.center.lng() || undefined
+    // TODO: fix this
+    // This is a hack, since somtimes the center is created using google maps and sometimes it's made by hands
+    // e.g. when we set the center based on query params
+    const lat = latitude || (typeof this.state.center.lat === 'number' && this.state.center.lat) || this.state.center.lat() || undefined
+    const lng = longitude || (typeof this.state.center.lng === 'number' && this.state.center.lng) || this.state.center.lng() || undefined
     if (!lat || !lng) {
       return
     }
@@ -193,6 +222,10 @@ class EventList extends React.Component {
         this.state.getLocationFromEvents()
         this.setState({loadingEvents: false})
       })
+
+    let locationParams = _.pick(queryParams, 'latitude', 'longitude')
+    locationParams = queryString.stringify(locationParams)
+    window.history.pushState({}, "", `${window.location.pathname}?${locationParams}`)
   }
 
 
@@ -248,13 +281,8 @@ class EventList extends React.Component {
     })
   }
 
-  onCenterChanged(e) {
-    // console.log('update center', e)
-  }
-
   getMarkers() {
     return this.state.places.map(place=>{
-      const isSelected = this.state.selectedEvent && (_.findIndex(place.events, this.state.selectedEvent) !== -1)
       const position = {lat: parseFloat(place.latitude), lng: parseFloat(place.longitude)}
       return (
         <MarkerWithLabel

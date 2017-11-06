@@ -610,7 +610,6 @@ td.rdtYear:hover {
   border: 2px red solid; }
 
 .google-map-wrapper {
-  width: 50vw;
   height: 100vh;
   position: fixed;
   top: 0;
