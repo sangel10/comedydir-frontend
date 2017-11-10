@@ -28,6 +28,7 @@ class EventList extends React.Component {
 
       events: [],
       start_time: start,
+      useCustomStartTime: false,
       ordering: 'start_time',
       selectedEvent: null,
       totalEvents: null,
@@ -193,7 +194,7 @@ class EventList extends React.Component {
 
   getEvents(latitude, longitude) {
     this.setState({loadingEvents: true})
-    const baseUrl = 'http://127.0.0.1:8000/events/events/'
+    const baseUrl = `http://${process.env.REACT_APP_BACKEND_API_URL}/events/events/`
     const queryParams={}
     // TODO: fix this
     // This is a hack, since somtimes the center is created using google maps and sometimes it's made by hands
@@ -260,6 +261,7 @@ class EventList extends React.Component {
     const obj = {}
     // Round to the nearest hour to prevent cache busting by unique timestamps
     obj[variable] = moment(e._d).startOf('hour')
+    obj.useCustomStartTime = true
     this.setState(obj)
   }
 
@@ -362,6 +364,7 @@ class EventList extends React.Component {
       { value: 'distance_from_target', label: 'Distance', clearableValue: false},
       { value: 'start_time', label: 'Start time', clearableValue: false},
     ]
+
     return (
       <div className="events-container">
         <GoogleMapsWrapper
@@ -377,7 +380,7 @@ class EventList extends React.Component {
               center={this.state.center}
               onMapMounted={this.state.onMapMounted}
               onBoundsChanged={this.state.onBoundsChanged}
-              onCenterChanged={this.onCenterChanged.bind(this)}
+              onCenterChanged={this.state.onCenterChanged}
               ref={this.state.onMapMounted}
             >
               <MarkerClusterer
