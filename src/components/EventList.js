@@ -368,7 +368,7 @@ class EventList extends React.Component {
     return (
       <div className="events-container">
         <GoogleMapsWrapper
-          googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAP_KEY}&libraries=geometry,drawing,places`} // libraries=geometry,drawing,places
+          googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAP_KEY}&libraries=geometry,drawing,places`} // libraries=geometry,drawing,places
           loadingElement={<div style={{ height: `100vh`, width: `100vw` }} >LOADING</div>}
           containerElement={<div style={{ height: `100vh`, width: `100vw` }} >CONTAINER</div>}
           mapElement={<div style={{ height: `100vh`, width: `100vw`}} >MAP</div>}
