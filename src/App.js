@@ -1,20 +1,23 @@
 import React from 'react' // eslint-disable-line no-unused-vars
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Link, Redirect, Switch } from 'react-router-dom'
 import EventList from './components/EventList'
 
 import './App.css'
 
-const BasicExample = () => (
+const ComedyDirectoryApp = () => (
   <Router>
     <div className="App">
       <ul>
         <li><Link to="/">Home</Link></li>
       </ul>
-
       <hr/>
-
-      <Route exact path="/" component={EventList}/>
+      <Switch>
+        <Route path="/events/:eventSlug?" component={EventList}/>
+        <Route path="/">
+          <Redirect to="/events"/>
+        </Route>
+      </Switch>
     </div>
   </Router>
 )
-export default BasicExample
+export default ComedyDirectoryApp
