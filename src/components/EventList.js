@@ -5,7 +5,7 @@ import Datetime from 'react-datetime'
 import queryString from 'query-string'
 import _ from 'lodash'
 import MarkerWithLabel from "react-google-maps/lib/components/addons/MarkerWithLabel"
-
+import { BrowserRouter as Router, Route, Link, Redirect } from 'react-router-dom'
 import Select from 'react-select'
 
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
@@ -108,34 +108,29 @@ class EventList extends React.Component {
 
   componentDidMount() {
     // this.getUserLocation()
+    if (this.props.match.params.eventSlug) {
+      this.getSelectedEvent(this.props.match.params.eventSlug)
+      return
+    }
     const params = queryString.parse(window.location.search)
     const nextState = {}
+    console.log('did mount')
     if (!params.latitude || !params.longitude) {
       console.log('NO LAT AND LNG')
       this.getUserLocation()
       return
     }
-    // nextState.center = {
-    //   lat: ()=>{
-    //     parseInt(params.latitude, 10)
-    //   },
-    //   lng: ()=>{
-    //     parseInt(params.longitude, 10)
-    //   }
-    // }
+
     nextState.center = {
       lat: parseFloat(params.latitude, 10),
       lng: parseFloat(params.longitude, 10),
     }
-    // nextState.center = {lat: parseInt(params.latitude, 10), lng: parseInt(params.longitude, 10)}
-    // nextState.center = new window.google.maps.LatLng(params.latitude, params.longitude)
     nextState.page = parseInt(params.page, 10) || undefined
     nextState.days = parseInt(params.days, 10) || undefined
     nextState.radius = parseFloat(params.radius) || undefined
     nextState.ordering = params.ordering || undefined
     nextState.start_time = params.start_time ? moment(parseInt(params.start_time, 10)) : undefined
     const cleanNextState = _.omitBy(nextState, _.isUndefined)
-    console.log('CLEAN STATE', cleanNextState)
     this.setState(cleanNextState)
     // this.getEvents(params.latitude, params.longitude)
   }
@@ -192,12 +187,27 @@ class EventList extends React.Component {
     }
   }
 
+  getSelectedEvent(slug) {
+    const eventId = slug.split('-')[0]
+    const url = `http://${process.env.REACT_APP_BACKEND_API_URL}/events/events/${eventId}`
+    this.setState({loadingEvents: true})
+    axios.get(url)
+      .then(response =>{
+        console.log('selected event RESPONSE', response)
+        this.setState({
+          selectedEvent: response.data,
+          loadingEvents: false,
+          center: {lat: parseFloat(response.data.facebook_place.latitude, 10), lng: parseFloat(response.data.facebook_place.longitude, 10)}
+        })
+      })
+  }
+
   getEvents(latitude, longitude) {
     this.setState({loadingEvents: true})
     const baseUrl = `http://${process.env.REACT_APP_BACKEND_API_URL}/events/events/`
     const queryParams={}
     // TODO: fix this
-    // This is a hack, since somtimes the center is created using google maps and sometimes it's made by hands
+    // This is a hack, since sometimes the center is created using google maps and sometimes it's made by hand
     // e.g. when we set the center based on query params
     const lat = latitude || (typeof this.state.center.lat === 'number' && this.state.center.lat) || this.state.center.lat() || undefined
     const lng = longitude || (typeof this.state.center.lng === 'number' && this.state.center.lng) || this.state.center.lng() || undefined
@@ -226,12 +236,20 @@ class EventList extends React.Component {
 
     let locationParams = _.pick(queryParams, 'latitude', 'longitude')
     locationParams = queryString.stringify(locationParams)
-    window.history.pushState({}, "", `${window.location.pathname}?${locationParams}`)
+    // window.history.pushState({}, "", `/events?${locationParams}`)
+    this.props.history.push(`/events?${locationParams}`)
+    // <Redirect to={`/events?${locationParams}`} />
   }
 
 
-  renderEvents() {
-    return this.state.events.map((event)=>{
+  renderEventList() {
+    let events = this.state.events
+    if (this.props.match.params.eventSlug && this.state.selectedEvent) {
+      events = [this.state.selectedEvent]
+      // this.state.selectedEvent.facebook_place.events = [this.state.selectedEvent]
+    }
+
+    return events.map((event)=>{
       const isActive = this.state.selectedEvent === event
       return (
         <div
@@ -240,6 +258,7 @@ class EventList extends React.Component {
           onClick={()=> {this.selectEvent(event); this.centerEvent(event)}}
         >
           <h4>{event.name}</h4>
+          <Link to={`/events/${event.slug}`}>See event</Link>
           <div>@ {event.facebook_place.facebook_name}</div>
           <div>{moment(event.start_time).fromNow()}</div>
           {!isActive ? null :
@@ -283,8 +302,13 @@ class EventList extends React.Component {
     })
   }
 
-  getMarkers() {
-    return this.state.places.map(place=>{
+  renderMarkers() {
+    let markerSource = this.state.places
+    if (this.props.match.params.eventSlug && this.state.selectedEvent) {
+      markerSource = [this.state.selectedEvent.facebook_place]
+      this.state.selectedEvent.facebook_place.events = [this.state.selectedEvent]
+    }
+    return markerSource.map(place=>{
       const position = {lat: parseFloat(place.latitude), lng: parseFloat(place.longitude)}
       return (
         <MarkerWithLabel
@@ -338,8 +362,8 @@ class EventList extends React.Component {
   }
 
   render() {
-    const events = this.renderEvents()
-    const markers = this.getMarkers()
+    const events = this.renderEventList()
+    const markers = this.renderMarkers()
     const radiusSelectOptions = [
       { value: 0.5, label: '0.5', clearableValue: false},
       { value: 1, label: '1', clearableValue: false},
@@ -383,20 +407,8 @@ class EventList extends React.Component {
               onCenterChanged={this.state.onCenterChanged}
               ref={this.state.onMapMounted}
             >
-              <MarkerClusterer
-                averageCenter
-                enableRetinaIcons
-                gridSize={60}
-              >
-                {this.props.children}
-              </MarkerClusterer>
               {markers}
-              <button className="my-location-button"
-                onClick={this.getUserLocation.bind(this)}>
-                My Location
-              </button>
             </GoogleMap>
-
           </div>
           <div className="event-list">
             <div className="event-controls">
