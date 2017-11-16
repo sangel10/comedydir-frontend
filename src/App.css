@@ -617,9 +617,6 @@ td.rdtYear:hover {
   margin: 0 0; }
 
 .my-location-button {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
   z-index: 5500000;
   background: red;
   color: white;

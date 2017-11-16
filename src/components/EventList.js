@@ -423,6 +423,10 @@ class EventList extends React.Component {
                   }}
                 />
               </StandaloneSearchBox>
+              <button className="my-location"
+                onClick={this.getUserLocation.bind(this)}>
+                My Location
+              </button>
               <Datetime
                 defaultValue={this.state.start_time}
                 onChange={(e)=>{this.onDatetimeChange('start_time', e)}}
