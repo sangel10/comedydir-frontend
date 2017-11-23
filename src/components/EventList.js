@@ -5,11 +5,10 @@ import Datetime from 'react-datetime'
 import queryString from 'query-string'
 import _ from 'lodash'
 import MarkerWithLabel from "react-google-maps/lib/components/addons/MarkerWithLabel"
-import { BrowserRouter as Router, Route, Link, Redirect } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import Select from 'react-select'
 
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
-import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer"
 import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
 import PageControl from "./PageControl"
 
@@ -34,7 +33,7 @@ class EventList extends React.Component {
       totalEvents: null,
       radius: 10,
       limit: 50, // TODO: hardcoded for now, in the future find a way to get this from the API
-      days: 1,
+      days: 7,
       page: 1,
       hasNextPage: false,
       loadingEvents: false,
@@ -296,7 +295,8 @@ class EventList extends React.Component {
     this.setState({lat: place.latitude, lng: place.longitude})
     const eventClass = `event-${place.events[0].pk}`
     const element = document.getElementsByClassName(eventClass)[0]
-    window.scrollTo({
+    const container = document.getElementsByClassName('event-list__container')[0]
+    container.scrollTo({
       'behavior': 'smooth',
       'top': element.offsetTop + 100
     })
@@ -306,7 +306,7 @@ class EventList extends React.Component {
     let markerSource = this.state.places
     if (this.props.match.params.eventSlug && this.state.selectedEvent) {
       markerSource = [this.state.selectedEvent.facebook_place]
-      this.state.selectedEvent.facebook_place.events = [this.state.selectedEvent]
+      markerSource[0].events = [this.state.selectedEvent]
     }
     return markerSource.map(place=>{
       const position = {lat: parseFloat(place.latitude), lng: parseFloat(place.longitude)}
