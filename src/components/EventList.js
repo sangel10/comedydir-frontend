@@ -113,7 +113,7 @@ class EventList extends React.Component {
     }
     const params = queryString.parse(window.location.search)
     const nextState = {}
-    console.log('did mount')
+    console.log('did mount, HOLY FUCK IT WORKS')
     if (!params.latitude || !params.longitude) {
       console.log('NO LAT AND LNG')
       this.getUserLocation()
