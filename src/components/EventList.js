@@ -188,7 +188,7 @@ class EventList extends React.Component {
 
   getSelectedEvent(slug) {
     const eventId = slug.split('-')[0]
-    const url = `http://${process.env.REACT_APP_BACKEND_API_URL}/events/events/${eventId}`
+    const url = `//${process.env.REACT_APP_BACKEND_API_URL}/events/events/${eventId}`
     this.setState({loadingEvents: true})
     axios.get(url)
       .then(response =>{
@@ -203,7 +203,7 @@ class EventList extends React.Component {
 
   getEvents(latitude, longitude) {
     this.setState({loadingEvents: true})
-    const baseUrl = `http://${process.env.REACT_APP_BACKEND_API_URL}/events/events/`
+    const baseUrl = `//${process.env.REACT_APP_BACKEND_API_URL}/events/events/`
     const queryParams={}
     // TODO: fix this
     // This is a hack, since sometimes the center is created using google maps and sometimes it's made by hand
