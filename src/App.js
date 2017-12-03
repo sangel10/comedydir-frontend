@@ -4,6 +4,13 @@ import EventList from './components/EventList'
 
 import './App.css'
 
+import ReactGA from 'react-ga'
+// initialize Google Analytics if we have a tracking ID
+if (process.env.REACT_APP_GOOGLE_ANALYTICS_ID) {
+  ReactGA.initialize(process.env.REACT_APP_GOOGLE_ANALYTICS_ID)
+  ReactGA.pageview(window.location.pathname + window.location.search)
+}
+
 const ComedyDirectoryApp = () => (
   <Router>
     <div className="App">
