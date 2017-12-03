@@ -7,6 +7,7 @@ import _ from 'lodash'
 import MarkerWithLabel from "react-google-maps/lib/components/addons/MarkerWithLabel"
 import { Link } from 'react-router-dom'
 import Select from 'react-select'
+import Helmet from 'react-helmet'
 
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
 import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
@@ -26,7 +27,7 @@ class EventList extends React.Component {
     this.state = {
 
       events: [],
-      start_time: start,
+      startTime: start,
       useCustomStartTime: false,
       ordering: 'start_time',
       selectedEvent: null,
@@ -37,6 +38,7 @@ class EventList extends React.Component {
       page: 1,
       hasNextPage: false,
       loadingEvents: false,
+      placeName: null,
       places: [],
       getLocationFromEvents: () => {
         const places = []
@@ -97,6 +99,7 @@ class EventList extends React.Component {
         this.setState({
           center: nextCenter,
           markers: nextMarkers,
+          placeName: places[0].formatted_address,
         })
         this.customRefs.map.fitBounds(bounds)
         this.getEvents(nextCenter.lat(), nextCenter.lng())
@@ -113,9 +116,7 @@ class EventList extends React.Component {
     }
     const params = queryString.parse(window.location.search)
     const nextState = {}
-    console.log('did mount, HOLY FUCK IT WORKS')
     if (!params.latitude || !params.longitude) {
-      console.log('NO LAT AND LNG')
       this.getUserLocation()
       return
     }
@@ -128,14 +129,15 @@ class EventList extends React.Component {
     nextState.days = parseInt(params.days, 10) || undefined
     nextState.radius = parseFloat(params.radius) || undefined
     nextState.ordering = params.ordering || undefined
-    nextState.start_time = params.start_time ? moment(parseInt(params.start_time, 10)) : undefined
+    nextState.startTime = params.start_time ? moment(parseInt(params.start_time, 10)) : undefined
+    nextState.placeName = params.place_name || undefined
     const cleanNextState = _.omitBy(nextState, _.isUndefined)
     this.setState(cleanNextState)
-    // this.getEvents(params.latitude, params.longitude)
+    this.getEvents(params.latitude, params.longitude)
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.start_time !== prevState.start_time ||
+    if (this.state.startTime !== prevState.startTime ||
       this.state.radius !== prevState.radius ||
       this.state.days !== prevState.days ||
       this.state.ordering !== prevState.ordering ||
@@ -179,11 +181,30 @@ class EventList extends React.Component {
         this.setState({
           center: {lat: parseFloat(pos.lat, 10), lng: parseFloat(pos.lng, 10)}
         })
+        this.getLocationFromCoordinates(pos.lat, pos.lng)
         this.getEvents(parseFloat(pos.lat, 10), parseFloat(pos.lng, 10))
       }, () => {
         // handleLocationError(true, infoWindow, map.getCenter());
       })
     }
+  }
+
+  getLocationFromCoordinates(lat, lng) {
+    const geocoder = new window.google.maps.Geocoder()
+    var latlng = new window.google.maps.LatLng(lat, lng)
+    geocoder.geocode({'latLng': latlng}, (results, status) => {
+      if (status === window.google.maps.GeocoderStatus.OK) {
+        if (results[1]) {
+          this.setState({placeName: results[0].formatted_address})
+        }
+        else {
+          console.log("No results found")
+        }
+      }
+      else {
+        console.log("Geocoder failed due to: ", status)
+      }
+    })
   }
 
   getSelectedEvent(slug) {
@@ -214,7 +235,7 @@ class EventList extends React.Component {
       return
     }
     queryParams.radius = this.state.radius || undefined
-    queryParams.start_time = this.state.start_time ? this.state.start_time.unix() : undefined
+    queryParams.start_time = this.state.startTime ? this.state.startTime.unix() : undefined
     queryParams.latitude = lat
     queryParams.longitude = lng
     queryParams.days = this.state.days || undefined
@@ -234,6 +255,7 @@ class EventList extends React.Component {
       })
 
     let locationParams = _.pick(queryParams, 'latitude', 'longitude')
+    locationParams.place_name = this.state.placeName || undefined
     locationParams = queryString.stringify(locationParams)
     // window.history.pushState({}, "", `/events?${locationParams}`)
     this.props.history.push(`/events?${locationParams}`)
@@ -361,6 +383,16 @@ class EventList extends React.Component {
     this.setState({center: myPlace })
   }
 
+  getTitle() {
+    if (this.state.selectedEvent) {
+      return `${this.state.selectedEvent.name} ${this.state.selectedEvent.facebook_place.facebook_city}, ${this.state.selectedEvent.facebook_place.facebook_country} | Find Live Comedy`
+    }
+    if (this.state.events.length && this.state.placeName) {
+      return `Comedy events near ${this.state.placeName} | Find Live Comedy`
+    }
+    return null
+  }
+
   render() {
     const events = this.renderEventList()
     const markers = this.renderMarkers()
@@ -389,8 +421,11 @@ class EventList extends React.Component {
       { value: 'start_time', label: 'Start time', clearableValue: false},
     ]
 
+    const title = this.getTitle()
+
     return (
       <div className="events-container">
+        <Helmet title={title} />
         <GoogleMapsWrapper
           googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAP_KEY}&libraries=geometry,drawing,places`} // libraries=geometry,drawing,places
           loadingElement={<div style={{ height: `100vh`, width: `100vw` }} >LOADING</div>}
@@ -440,8 +475,8 @@ class EventList extends React.Component {
                 My Location
               </button>
               <Datetime
-                defaultValue={this.state.start_time}
-                onChange={(e)=>{this.onDatetimeChange('start_time', e)}}
+                defaultValue={this.state.startTime}
+                onChange={(e)=>{this.onDatetimeChange('startTime', e)}}
               />
               Radius
               <Select
