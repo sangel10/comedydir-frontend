@@ -1,7 +1,7 @@
 import React from 'react'
 import axios from 'axios'
 import moment from 'moment'
-import Datetime from 'react-datetime'
+import DatePicker from 'react-datepicker'
 import queryString from 'query-string'
 import _ from 'lodash'
 import MarkerWithLabel from "react-google-maps/lib/components/addons/MarkerWithLabel"
@@ -474,9 +474,10 @@ class EventList extends React.Component {
                 onClick={this.getUserLocation.bind(this)}>
                 My Location
               </button>
-              <Datetime
-                defaultValue={this.state.startTime}
+              <DatePicker
+                selected={this.state.startTime}
                 onChange={(e)=>{this.onDatetimeChange('startTime', e)}}
+                showTimeSelect
               />
               Radius
               <Select

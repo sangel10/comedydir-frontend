@@ -1,6 +1,7 @@
 @import 'react-datetime/css/react-datetime';
 @import 'react-select/dist/react-select';
 @import 'src/styles/EventList';
+@import 'react-datepicker/dist/react-datepicker-cssmodules';
 
 .App {
   text-align: center;
@@ -26,3 +27,8 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.react-datepicker-popper {
+  transform: translate3d(78px, 175px, 0px) scale(1.5) !important;
+}
+
