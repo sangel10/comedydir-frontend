@@ -12,6 +12,7 @@ import Helmet from 'react-helmet'
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
 import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
 import PageControl from "./PageControl"
+import MyLocationIcon from "./MyLocationIcon"
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   return <div>{props.children}</div>
@@ -275,7 +276,7 @@ class EventList extends React.Component {
       return (
         <div
           key={event.facebook_id}
-          className={`event-${event.pk} ${isActive ? 'is-active' : ''}`}
+          className={`event-item event-${event.pk} ${isActive ? 'is-active' : ''}`}
           onClick={()=> {this.selectEvent(event); this.centerEvent(event)}}
         >
           <h4>{event.name}</h4>
@@ -428,9 +429,9 @@ class EventList extends React.Component {
         <Helmet title={title} />
         <GoogleMapsWrapper
           googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAP_KEY}&libraries=geometry,drawing,places`} // libraries=geometry,drawing,places
-          loadingElement={<div style={{ height: `100vh`, width: `100vw` }} >LOADING</div>}
-          containerElement={<div style={{ height: `100vh`, width: `100vw` }} >CONTAINER</div>}
-          mapElement={<div style={{ height: `100vh`, width: `100vw`}} >MAP</div>}
+          loadingElement={<div style={{ height: `100%`, width: `100%` }} >LOADING</div>}
+          containerElement={<div style={{ height: `95vh`, width: `100vw` }} >CONTAINER</div>}
+          mapElement={<div style={{ height: `100%`, width: `100%`}} >MAP</div>}
         >
           <div className="google-map-wrapper">
             <GoogleMap
@@ -454,61 +455,52 @@ class EventList extends React.Component {
               >
                 <input
                   type="text"
-                  placeholder="Search For events near this location"
-                  style={{
-                    boxSizing: `border-box`,
-                    border: `1px solid transparent`,
-                    width: `240px`,
-                    height: `32px`,
-                    marginTop: `27px`,
-                    padding: `0 12px`,
-                    borderRadius: `3px`,
-                    boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
-                    fontSize: `14px`,
-                    outline: `none`,
-                    textOverflow: `ellipses`,
-                  }}
+                  placeholder="Find Events Near..."
                 />
               </StandaloneSearchBox>
-              <button className="my-location"
+              <button className="my-location-button"
                 onClick={this.getUserLocation.bind(this)}>
-                My Location
+                <MyLocationIcon/>
               </button>
-              <DatePicker
-                selected={this.state.startTime}
-                onChange={(e)=>{this.onDatetimeChange('startTime', e)}}
-                showTimeSelect
-              />
-              Radius
-              <Select
-                name="radius-select"
-                type="number"
-                value={this.state.radius}
-                options={radiusSelectOptions}
-                onChange={(e)=>{this.updateSelect('radius', e)}}
-              />
-              Days
-              <Select
-                name="days-select"
-                type="number"
-                value={this.state.days}
-                options={daysSelectOptions}
-                onChange={(e)=>{this.updateSelect('days', e)}}
-              />
-              Order By
-              <Select
-                name="ordering-select"
-                type="number"
-                value={this.state.ordering}
-                options={orderingSelectOptions}
-                onChange={(e)=>{this.updateSelect('ordering', e)}}
-              />
-              <PageControl
-                totalPages={parseInt(this.state.totalEvents / this.state.limit, 10)}
-                currentPage={this.state.page}
-                hasNextPage={this.state.hasNextPage}
-                onClick={this.onPageChanged.bind(this)}
-              />
+              <div className="form-fields">
+                <label htmlFor="datepicker">Start Date</label>
+                <DatePicker
+                  selected={this.state.startTime}
+                  id="datepicker"
+                  onChange={(e)=>{this.onDatetimeChange('startTime', e)}}
+                  showTimeSelect
+                />
+                <label htmlFor="radius-select">Radius in km</label>
+                <Select
+                  name="radius-select"
+                  type="number"
+                  value={this.state.radius}
+                  options={radiusSelectOptions}
+                  onChange={(e)=>{this.updateSelect('radius', e)}}
+                />
+                <label htmlFor="days-select">Days</label>
+                <Select
+                  name="days-select"
+                  type="number"
+                  value={this.state.days}
+                  options={daysSelectOptions}
+                  onChange={(e)=>{this.updateSelect('days', e)}}
+                />
+                <label htmlFor="ordering-select">Order By</label>
+                <Select
+                  name="ordering-select"
+                  type="number"
+                  value={this.state.ordering}
+                  options={orderingSelectOptions}
+                  onChange={(e)=>{this.updateSelect('ordering', e)}}
+                />
+                <PageControl
+                  totalPages={parseInt(this.state.totalEvents / this.state.limit, 10)}
+                  currentPage={this.state.page}
+                  hasNextPage={this.state.hasNextPage}
+                  onClick={this.onPageChanged.bind(this)}
+                />
+              </div>
             </div>
             <div className="event-list__container">
               <div className="event-list__items">

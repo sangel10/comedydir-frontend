@@ -577,11 +577,13 @@ td.rdtYear:hover {
 .events-container {
   position: relative;
   justify-content: flex-end;
-  overflow-x: hidden;
-  display: flex; }
+  overflow: hidden;
+  display: flex;
+  height: calc(100vh - 3m); }
 
 .event-controls {
   position: absolute;
+  text-align: center;
   width: 100%;
   z-index: 100;
   background: rgba(255, 255, 255, 0.8); }
@@ -598,9 +600,9 @@ td.rdtYear:hover {
   width: 33vw;
   margin: 0;
   float: right;
-  position: fixed;
+  position: absolute;
   top: 0;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(192, 192, 192, 0.5);
   height: 100%; }
   .event-list img {
     width: 100%;
@@ -616,11 +618,18 @@ td.rdtYear:hover {
   left: 0;
   margin: 0 0; }
 
-.my-location-button {
-  z-index: 5500000;
-  background: red;
-  color: white;
-  cursor: pointer; }
+.my-location-button svg {
+  fill: white;
+  height: 3.8rem;
+  height: 32px; }
+
+.event-item {
+  padding: 1em;
+  border-bottom: 1px solid grey; }
+
+.form-fields {
+  display: flex;
+  flex-direction: column; }
 
 :global .react-datepicker-popper[data-placement^="bottom"] .react-datepicker__triangle, :global .react-datepicker-popper[data-placement^="top"] .react-datepicker__triangle, :global .react-datepicker__year-read-view--down-arrow, :global .react-datepicker__month-read-view--down-arrow {
   margin-left: -8px;
@@ -1082,9 +1091,6 @@ td.rdtYear:hover {
 :global .react-datepicker__portal .react-datepicker__navigation--next:hover {
   border-left-color: #b3b3b3; }
 
-.App {
-  text-align: center; }
-
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 80px; }
@@ -1109,7 +1115,6 @@ td.rdtYear:hover {
 
 header, footer {
   z-index: 1;
-  position: fixed;
   /* height: 117px; */
   text-align: center;
   margin: 0;
@@ -1118,5 +1123,9 @@ header, footer {
   background: white;
   padding: 11px; }
 
-footer {
-  bottom: 0; }
+header {
+  line-height: 3em;
+  height: 3em;
+  padding: 0; }
+  header a, header small {
+    vertical-align: middle; }

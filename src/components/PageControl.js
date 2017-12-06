@@ -22,6 +22,7 @@ class PageControl extends React.Component {
     const pages = this.getPages()
     return (
       <div>
+        Page 
         {this.props.currentPage > 1 ? <span onClick={() => {this.props.onClick(this.props.currentPage - 1)}}> Prev</span> : null}
         {pages}
         {this.props.hasNextPage ? <span onClick={() => {this.props.onClick(this.props.currentPage + 1)}}> Next</span> : null}

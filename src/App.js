@@ -1,5 +1,5 @@
 import React from 'react' // eslint-disable-line no-unused-vars
-import { BrowserRouter as Router, Route, Link, Redirect, Switch } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom'
 import EventList from './components/EventList'
 
 import './App.css'
@@ -12,19 +12,20 @@ if (process.env.REACT_APP_GOOGLE_ANALYTICS_ID) {
 }
 
 const ComedyDirectoryApp = () => (
-  <Router>
-    <div className="App">
-      <ul>
-        <li><Link to="/">Home</Link></li>
-      </ul>
-      <hr/>
-      <Switch>
-        <Route path="/events/:eventSlug?" component={EventList}/>
-        <Route path="/">
-          <Redirect to="/events"/>
-        </Route>
-      </Switch>
-    </div>
-  </Router>
+  <div className="app-container">
+    <header>
+      <a href="/">Find Live Comedy</a> - <small>Made by <a href="//twitter.com/nuclearYolocst" target="_blank" rel="noopener noreferrer">Santiago Angel</a></small>
+    </header>
+    <Router>
+      <div className="App">
+        <Switch>
+          <Route path="/events/:eventSlug?" component={EventList}/>
+          <Route path="/">
+            <Redirect to="/events"/>
+          </Route>
+        </Switch>
+      </div>
+    </Router>
+  </div>
 )
 export default ComedyDirectoryApp

@@ -1,14 +1,17 @@
 .events-container {
   position: relative;
   justify-content: flex-end;
-  overflow-x: hidden;
+  // overflow-x: hidden;
+  overflow: hidden;
   display: flex;
+  height: calc(100vh - 3m);
   // justify-content: flex-start;
 }
 
 
 .event-controls {
   position: absolute;
+  text-align: center;
   width: 100%;
   z-index: 100;
   background: rgba(255,255,255, 0.8);
@@ -34,9 +37,9 @@
     height: auto;
   }
   float: right;
-  position: fixed;
+  position: absolute;
   top: 0;
-  background: rgba(255,255,255, 0.5);
+  background: rgba(192,192,192, 0.5);
   height: 100%;
   // overflow: auto;
 }
@@ -53,12 +56,31 @@
   margin: 0 0;
 }
 
+// .my-location-button {
+//   // position: absolute;
+//   // bottom: 10px;
+//   // left: 10px;
+//   z-index: 5500000;
+//   background: red;
+//   color: white;
+//   cursor: pointer;
+// }
+
 .my-location-button {
-  // position: absolute;
-  // bottom: 10px;
-  // left: 10px;
-  z-index: 5500000;
-  background: red;
-  color: white;
-  cursor: pointer;
+  svg {
+    fill: white;
+    height: 3.8rem;
+    height: 32px;
+  }
+}
+
+
+.event-item {
+  padding: 1em;
+  border-bottom: 1px solid grey;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
 }

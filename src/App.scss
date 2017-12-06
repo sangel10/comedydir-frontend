@@ -4,7 +4,7 @@
 @import 'react-datepicker/dist/react-datepicker-cssmodules';
 
 .App {
-  text-align: center;
+  // text-align: center;
 }
 
 .App-logo {
@@ -32,3 +32,32 @@
   transform: translate3d(78px, 175px, 0px) scale(1.5) !important;
 }
 
+header, footer {
+  z-index: 1;
+  // position: fixed;
+  /* height: 117px; */
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background: white;
+  padding: 11px;
+}
+
+header {
+  line-height: 3em;
+  height: 3em;
+  padding: 0;
+
+  a, small {
+    vertical-align: middle;
+  }
+}
+
+// footer {
+//   bottom: 0
+// }
+
+// .app-container {
+//   height: 95vh;
+// }
