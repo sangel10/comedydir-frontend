@@ -1,6 +1,6 @@
 import React from 'react' // eslint-disable-line no-unused-vars
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom'
-import EventList from './components/EventList'
+import Main from './components/Main'
 
 import './App.css'
 
@@ -19,7 +19,7 @@ const ComedyDirectoryApp = () => (
     <Router>
       <div className="App">
         <Switch>
-          <Route path="/events/:eventSlug?" component={EventList}/>
+          <Route path="/events/:eventSlug?" component={Main}/>
           <Route path="/">
             <Redirect to="/events"/>
           </Route>

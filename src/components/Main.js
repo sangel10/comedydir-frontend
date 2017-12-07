@@ -15,7 +15,7 @@ const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
 }))
 
 
-class EventList extends React.Component {
+class Main extends React.Component {
   constructor(props) {
     super(props)
     const start = moment().startOf('hour').subtract(30, 'days')
@@ -453,4 +453,4 @@ class EventList extends React.Component {
   }
 }
 
-export default EventList
+export default Main
