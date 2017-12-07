@@ -1,19 +1,15 @@
 import React from 'react'
 import axios from 'axios'
 import moment from 'moment'
-import DatePicker from 'react-datepicker'
 import queryString from 'query-string'
 import _ from 'lodash'
 import MarkerWithLabel from "react-google-maps/lib/components/addons/MarkerWithLabel"
 import { Link } from 'react-router-dom'
-import Select from 'react-select'
 import Helmet from 'react-helmet'
 
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
-import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
-import PageControl from "./PageControl"
-import MyLocationIcon from "./MyLocationIcon"
 
+import EventSearchControls from "./EventSearchControls"
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   return <div>{props.children}</div>
 }))
@@ -27,6 +23,7 @@ class EventList extends React.Component {
     this.customRefs = {}
     this.state = {
 
+      isListVisible: true,
       events: [],
       startTime: start,
       useCustomStartTime: false,
@@ -397,31 +394,6 @@ class EventList extends React.Component {
   render() {
     const events = this.renderEventList()
     const markers = this.renderMarkers()
-    const radiusSelectOptions = [
-      { value: 0.5, label: '0.5', clearableValue: false},
-      { value: 1, label: '1', clearableValue: false},
-      { value: 2, label: '2', clearableValue: false},
-      { value: 3, label: '3', clearableValue: false},
-      { value: 5, label: '5', clearableValue: false},
-      { value: 10, label: '10', clearableValue: false},
-      { value: 50, label: '50', clearableValue: false},
-      { value: 100, label: '100', clearableValue: false},
-      { value: 500, label: '500', clearableValue: false},
-      { value: 1000, label: '1000', clearableValue: false},
-    ]
-    const daysSelectOptions = [
-      { value: 1, label: '1', clearableValue: false},
-      { value: 2, label: '2', clearableValue: false},
-      { value: 3, label: '3', clearableValue: false},
-      { value: 7, label: '7', clearableValue: false},
-      { value: 14, label: '14', clearableValue: false},
-      { value: 30, label: '30', clearableValue: false},
-    ]
-    const orderingSelectOptions = [
-      { value: 'distance_from_target', label: 'Distance', clearableValue: false},
-      { value: 'start_time', label: 'Start time', clearableValue: false},
-    ]
-
     const title = this.getTitle()
 
     return (
@@ -447,61 +419,23 @@ class EventList extends React.Component {
             </GoogleMap>
           </div>
           <div className="event-list">
-            <div className="event-controls">
-              <StandaloneSearchBox
-                ref={this.state.onSearchBoxMounted}
-                bounds={this.state.bounds}
-                onPlacesChanged={this.state.onPlacesChanged}
-              >
-                <input
-                  type="text"
-                  placeholder="Find Events Near..."
-                />
-              </StandaloneSearchBox>
-              <button className="my-location-button"
-                onClick={this.getUserLocation.bind(this)}>
-                <MyLocationIcon/>
-              </button>
-              <div className="form-fields">
-                <label htmlFor="datepicker">Start Date</label>
-                <DatePicker
-                  selected={this.state.startTime}
-                  id="datepicker"
-                  onChange={(e)=>{this.onDatetimeChange('startTime', e)}}
-                  showTimeSelect
-                />
-                <label htmlFor="radius-select">Radius in km</label>
-                <Select
-                  name="radius-select"
-                  type="number"
-                  value={this.state.radius}
-                  options={radiusSelectOptions}
-                  onChange={(e)=>{this.updateSelect('radius', e)}}
-                />
-                <label htmlFor="days-select">Days</label>
-                <Select
-                  name="days-select"
-                  type="number"
-                  value={this.state.days}
-                  options={daysSelectOptions}
-                  onChange={(e)=>{this.updateSelect('days', e)}}
-                />
-                <label htmlFor="ordering-select">Order By</label>
-                <Select
-                  name="ordering-select"
-                  type="number"
-                  value={this.state.ordering}
-                  options={orderingSelectOptions}
-                  onChange={(e)=>{this.updateSelect('ordering', e)}}
-                />
-                <PageControl
-                  totalPages={parseInt(this.state.totalEvents / this.state.limit, 10)}
-                  currentPage={this.state.page}
-                  hasNextPage={this.state.hasNextPage}
-                  onClick={this.onPageChanged.bind(this)}
-                />
-              </div>
-            </div>
+            <EventSearchControls
+              onSearchBoxMounted={this.state.onSearchBoxMounted.bind(this)}
+              bounds={this.state.bounds}
+              onPlacesChanged={this.state.onPlacesChanged.bind(this)}
+              getUserLocation={this.getUserLocation.bind(this)}
+              onDatetimeChange={this.onDatetimeChange.bind(this)}
+              startTime={this.state.startTime}
+              radius={this.state.radius}
+              updateSelect={this.updateSelect.bind(this)}
+              days={this.state.days}
+              ordering={this.state.ordering}
+              totalEvents={this.state.totalEvents}
+              limit={this.state.limit}
+              page={this.state.page}
+              hasNextPage={this.state.hasNextPage}
+              onPageChanged={this.onPageChanged.bind(this)}
+            />
             <div className="event-list__container">
               <div className="event-list__items">
                 {this.state.loadingEvents ? 'Loading Events...' :
