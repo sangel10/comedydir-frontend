@@ -1,11 +1,20 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
-import PageControl from "./PageControl"
 import DatePicker from 'react-datepicker'
 import Select from 'react-select'
 
 class EventSearchControls extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      areAdvancedSearchControlsVisible: false,
+      toggleAdvanceSearchControls: () =>{
+        this.setState({areAdvancedSearchControlsVisible: !this.state.areAdvancedSearchControlsVisible})
+      }
+    }
+  }
+
   render() {
     const radiusSelectOptions = [
       { value: 0.5, label: '0.5', clearableValue: false},
@@ -47,45 +56,45 @@ class EventSearchControls extends React.Component {
           onClick={this.props.getUserLocation.bind(this)}>
           Use My Location
         </button>
-        <div className="form-fields">
-          <label htmlFor="datepicker">Start Date</label>
-          <DatePicker
-            selected={this.props.startTime}
-            id="datepicker"
-            onChange={(e)=>{this.props.onDatetimeChange('startTime', e)}}
-            showTimeSelect
-          />
-          <label htmlFor="radius-select">Radius in km</label>
-          <Select
-            name="radius-select"
-            type="number"
-            value={this.props.radius}
-            options={radiusSelectOptions}
-            onChange={(e)=>{this.props.updateSelect('radius', e)}}
-          />
-          <label htmlFor="days-select">Days</label>
-          <Select
-            name="days-select"
-            type="number"
-            value={this.props.days}
-            options={daysSelectOptions}
-            onChange={(e)=>{this.props.updateSelect('days', e)}}
-          />
-          <label htmlFor="ordering-select">Order By</label>
-          <Select
-            name="ordering-select"
-            type="number"
-            value={this.props.ordering}
-            options={orderingSelectOptions}
-            onChange={(e)=>{this.props.updateSelect('ordering', e)}}
-          />
-          <PageControl
-            totalPages={parseInt(this.props.totalEvents / this.props.limit, 10)}
-            currentPage={this.props.page}
-            hasNextPage={this.props.hasNextPage}
-            onClick={this.props.onPageChanged.bind(this)}
-          />
+        <div onClick={this.state.toggleAdvanceSearchControls}>
+          {this.state.areAdvancedSearchControlsVisible ? "Hide Search Option" : "Search Search Options"}
         </div>
+        {this.state.areAdvancedSearchControlsVisible ?
+          <div className="form-fields">
+            <label htmlFor="datepicker">Start Date</label>
+            <DatePicker
+              selected={this.props.startTime}
+              id="datepicker"
+              onChange={(e)=>{this.props.onDatetimeChange('startTime', e)}}
+              showTimeSelect
+            />
+            <label htmlFor="radius-select">Radius in km</label>
+            <Select
+              name="radius-select"
+              type="number"
+              value={this.props.radius}
+              options={radiusSelectOptions}
+              onChange={(e)=>{this.props.updateSelect('radius', e)}}
+            />
+            <label htmlFor="days-select">Days</label>
+            <Select
+              name="days-select"
+              type="number"
+              value={this.props.days}
+              options={daysSelectOptions}
+              onChange={(e)=>{this.props.updateSelect('days', e)}}
+            />
+            <label htmlFor="ordering-select">Order By</label>
+            <Select
+              name="ordering-select"
+              type="number"
+              value={this.props.ordering}
+              options={orderingSelectOptions}
+              onChange={(e)=>{this.props.updateSelect('ordering', e)}}
+            />
+          </div>
+          : null
+        }
       </div>
     )
   }
@@ -103,9 +112,4 @@ EventSearchControls.propTypes = {
   updateSelect: PropTypes.func.isRequired,
   days: PropTypes.number.isRequired,
   ordering: PropTypes.string.isRequired,
-  totalEvents: PropTypes.number,
-  limit: PropTypes.number.isRequired,
-  page: PropTypes.number.isRequired,
-  hasNextPage: PropTypes.bool.isRequired,
-  onPageChanged: PropTypes.func.isRequired,
 }

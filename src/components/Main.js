@@ -3,13 +3,14 @@ import axios from 'axios'
 import moment from 'moment'
 import queryString from 'query-string'
 import _ from 'lodash'
-import { Link } from 'react-router-dom'
 import Helmet from 'react-helmet'
 
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
 
 import EventSearchControls from "./EventSearchControls"
 import MapMarkers from "./MapMarkers"
+import PageControl from "./PageControl"
+import EventList from "./EventList"
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   return <div>{props.children}</div>
@@ -262,39 +263,6 @@ class Main extends React.Component {
   }
 
 
-  renderEventList() {
-    let events = this.state.events
-    if (this.props.match.params.eventSlug && this.state.selectedEvent) {
-      events = [this.state.selectedEvent]
-      // this.state.selectedEvent.facebook_place.events = [this.state.selectedEvent]
-    }
-
-    return events.map((event)=>{
-      const isActive = this.state.selectedEvent === event
-      return (
-        <div
-          key={event.facebook_id}
-          className={`event-item event-${event.pk} ${isActive ? 'is-active' : ''}`}
-          onClick={()=> {this.selectEvent(event); this.centerEvent(event)}}
-        >
-          <h4>{event.name}</h4>
-          <Link to={`/events/${event.slug}`}>See event</Link>
-          <div>@ {event.facebook_place.facebook_name}</div>
-          <div>{moment(event.start_time).fromNow()}</div>
-          {!isActive ? null :
-            <div>
-              <img src={event.image_url} alt="event art"/>
-              <div>{moment(event.start_time).format("dddd, MMMM Do YYYY, h:mm:ss a")}</div>
-              <span>{event.facebook_place.facebook_city}, {event.facebook_place.facebook_country}</span>
-              <p>
-                {event.description}
-              </p>
-            </div>
-          }
-        </div>
-      )
-    })
-  }
 
   onDatetimeChange(variable, e) {
     const obj = {}
@@ -322,8 +290,6 @@ class Main extends React.Component {
       'top': element.offsetTop + 100
     })
   }
-
-
 
   updateSelect(key, e) {
     if (!e || !e.value) {
@@ -363,7 +329,6 @@ class Main extends React.Component {
   }
 
   render() {
-    const events = this.renderEventList()
     const title = this.getTitle()
 
     return (
@@ -406,18 +371,24 @@ class Main extends React.Component {
               updateSelect={this.updateSelect.bind(this)}
               days={this.state.days}
               ordering={this.state.ordering}
-              totalEvents={this.state.totalEvents}
               limit={this.state.limit}
-              page={this.state.page}
-              hasNextPage={this.state.hasNextPage}
-              onPageChanged={this.onPageChanged.bind(this)}
             />
             <div className="event-list__container">
               <div className="event-list__items">
                 {this.state.loadingEvents ? 'Loading Events...' :
                   <div>
                     <h3> Found {this.state.totalEvents} EVENTS:</h3>
-                    {events}
+                    <EventList
+                      events={this.state.events}
+                      match={this.props.match}
+                      selectedEvent={this.state.selectedEvent}
+                    />
+                    <PageControl
+                      totalPages={parseInt(this.state.totalEvents / this.state.limit, 10)}
+                      currentPage={this.state.page}
+                      hasNextPage={this.state.hasNextPage}
+                      onClick={this.onPageChanged.bind(this)}
+                    />
                   </div>
                 }
               </div>
