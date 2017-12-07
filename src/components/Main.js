@@ -3,13 +3,14 @@ import axios from 'axios'
 import moment from 'moment'
 import queryString from 'query-string'
 import _ from 'lodash'
-import MarkerWithLabel from "react-google-maps/lib/components/addons/MarkerWithLabel"
 import { Link } from 'react-router-dom'
 import Helmet from 'react-helmet'
 
 import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
 
 import EventSearchControls from "./EventSearchControls"
+import MapMarkers from "./MapMarkers"
+
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   return <div>{props.children}</div>
 }))
@@ -322,37 +323,7 @@ class Main extends React.Component {
     })
   }
 
-  renderMarkers() {
-    let markerSource = this.state.places
-    if (this.props.match.params.eventSlug && this.state.selectedEvent) {
-      markerSource = [this.state.selectedEvent.facebook_place]
-      markerSource[0].events = [this.state.selectedEvent]
-    }
-    return markerSource.map(place=>{
-      const position = {lat: parseFloat(place.latitude), lng: parseFloat(place.longitude)}
-      return (
-        <MarkerWithLabel
-          key={place.pk}
-          position={position}
-          labelAnchor={position}
-          labelStyle={{
-            backgroundColor: "rgba(0,0,0,0.5)",
-            fontSize: "16 px",
-            padding: "5px",
-            color: "white"
-          }}
-          onClick={()=>{
-            this.selectEvent(place.events[0])
-            this.onMarkerClick(place)
-          }}
-        >
-          <div>
-            {place.facebook_name} {moment(place.events[0].start_time).fromNow()}
-          </div>
-        </MarkerWithLabel>
-      )
-    })
-  }
+
 
   updateSelect(key, e) {
     if (!e || !e.value) {
@@ -393,7 +364,6 @@ class Main extends React.Component {
 
   render() {
     const events = this.renderEventList()
-    const markers = this.renderMarkers()
     const title = this.getTitle()
 
     return (
@@ -415,7 +385,13 @@ class Main extends React.Component {
               onCenterChanged={this.state.onCenterChanged}
               ref={this.state.onMapMounted}
             >
-              {markers}
+              <MapMarkers
+                places={this.state.places}
+                selectedEvent={this.state.selectedEvent}
+                match={this.props.match}
+                selectEvent={this.state.selectEvent}
+                onMarkerClick={this.onMarkerClick}
+              />
             </GoogleMap>
           </div>
           <div className="event-list">
