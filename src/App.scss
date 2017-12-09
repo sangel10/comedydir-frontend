@@ -1,9 +1,11 @@
 @import 'react-datetime/css/react-datetime';
 @import 'react-select/dist/react-select';
-@import 'src/styles/EventList';
 @import 'react-datepicker/dist/react-datepicker-cssmodules';
 
-.App {
+@import 'src/styles/EventList';
+@import 'src/styles/Menu';
+
+.app {
   // text-align: center;
 }
 

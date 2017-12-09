@@ -17,7 +17,7 @@ class EventList extends React.Component {
         <div
           key={event.facebook_id}
           className={`event-item event-${event.pk} ${isActive ? 'is-active' : ''}`}
-          onClick={()=> {this.selectEvent(event); this.centerEvent(event)}}
+          onClick={()=> {this.props.selectEvent(event); this.props.centerEvent(event)}}
         >
           <h4>{event.name}</h4>
           <Link to={`/events/${event.slug}`}>See event</Link>
@@ -49,6 +49,8 @@ EventList.propTypes = {
   events: PropTypes.array,
   match: PropTypes.object,
   selectedEvent: PropTypes.object,
+  centerEvent: PropTypes.func,
+  selectEvent: PropTypes.func,
 }
 
 export default EventList

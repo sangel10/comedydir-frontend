@@ -574,63 +574,6 @@ td.rdtYear:hover {
   to {
     -webkit-transform: rotate(1turn); } }
 
-.events-container {
-  position: relative;
-  justify-content: flex-end;
-  overflow: hidden;
-  display: flex;
-  height: calc(100vh - 3m); }
-
-.event-controls {
-  position: absolute;
-  text-align: center;
-  width: 100%;
-  z-index: 100;
-  background: rgba(255, 255, 255, 0.8); }
-
-.event-list__container {
-  position: relative;
-  height: 100vh;
-  overflow: auto; }
-
-.event-list__items {
-  margin-top: 300px; }
-
-.event-list {
-  width: 33vw;
-  margin: 0;
-  float: right;
-  position: absolute;
-  top: 0;
-  background: rgba(192, 192, 192, 0.5);
-  height: 100%; }
-  .event-list img {
-    width: 100%;
-    height: auto; }
-
-.is-active {
-  border: 2px red solid; }
-
-.google-map-wrapper {
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  margin: 0 0; }
-
-.my-location-button svg {
-  fill: white;
-  height: 3.8rem;
-  height: 32px; }
-
-.event-item {
-  padding: 1em;
-  border-bottom: 1px solid grey; }
-
-.form-fields {
-  display: flex;
-  flex-direction: column; }
-
 :global .react-datepicker-popper[data-placement^="bottom"] .react-datepicker__triangle, :global .react-datepicker-popper[data-placement^="top"] .react-datepicker__triangle, :global .react-datepicker__year-read-view--down-arrow, :global .react-datepicker__month-read-view--down-arrow {
   margin-left: -8px;
   position: absolute; }
@@ -1090,6 +1033,123 @@ td.rdtYear:hover {
 
 :global .react-datepicker__portal .react-datepicker__navigation--next:hover {
   border-left-color: #b3b3b3; }
+
+.events-container {
+  position: relative;
+  justify-content: flex-end;
+  overflow: hidden;
+  display: flex;
+  height: calc(100vh - 3m); }
+
+.event-controls {
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.8); }
+
+.event-list__container {
+  position: relative;
+  height: 100vh;
+  overflow: auto; }
+
+.event-list__items {
+  margin-top: 300px; }
+
+.event-list {
+  width: 33vw;
+  margin: 0;
+  float: right;
+  position: absolute;
+  top: 0;
+  background: rgba(255, 255, 255, 0.5);
+  height: 100%; }
+  .event-list img {
+    width: 100%;
+    height: auto; }
+  @media (max-width: 600px) {
+    .event-list {
+      width: 100%; } }
+
+.is-active {
+  border: 2px red solid; }
+
+.google-map-wrapper {
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0 0; }
+
+.my-location-button svg {
+  fill: white;
+  height: 3.8rem;
+  height: 32px; }
+
+.my-location-button .fa-crosshairs {
+  width: 50px;
+  height: 50px; }
+
+.event-item {
+  padding: 1em;
+  border-bottom: 1px solid grey; }
+
+.form-fields {
+  display: flex;
+  flex-direction: column; }
+
+.menu-container {
+  position: fixed;
+  z-index: 200; }
+
+/* Position and sizing of burger button */
+.bm-burger-button {
+  position: fixed;
+  width: 36px;
+  height: 30px;
+  left: 36px;
+  top: 36px; }
+
+/* Color/shape of burger icon bars */
+.bm-burger-bars {
+  background: #373a47; }
+
+/* Position and sizing of clickable cross button */
+.bm-cross-button {
+  height: 24px;
+  width: 24px; }
+
+/* Color/shape of close button cross */
+.bm-cross {
+  background: #bdc3c7; }
+
+/* General sidebar styles */
+.bm-menu {
+  background: #373a47;
+  padding: 2.5em 1.5em 0;
+  font-size: 1.15em; }
+
+/* Morph shape necessary with bubble or elastic */
+.bm-morph-shape {
+  fill: #373a47; }
+
+/* Wrapper for item list */
+.bm-item-list {
+  color: #b8b7ad;
+  padding: 0.8em; }
+
+/* Styling of overlay */
+.bm-overlay {
+  background: rgba(0, 0, 0, 0.3); }
+
+.bm-burger-button {
+  position: fixed;
+  width: 30px;
+  height: 30px;
+  left: 0;
+  top: 0;
+  margin: 10px;
+  line-height: 48px; }
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
