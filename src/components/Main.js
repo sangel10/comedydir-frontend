@@ -29,6 +29,7 @@ class Main extends React.Component {
       events: [],
       startTime: start,
       useCustomStartTime: false,
+      isSearchPanelVisible: true,
       ordering: 'start_time',
       selectedEvent: null,
       totalEvents: null,
@@ -40,6 +41,12 @@ class Main extends React.Component {
       loadingEvents: false,
       placeName: null,
       places: [],
+      toggleSearchPanel: () => {
+        console.log('toggle search panel')
+        this.setState({
+          isSearchPanelVisible: !this.state.isSearchPanelVisible,
+        })
+      },
       getLocationFromEvents: () => {
         const places = []
         this.state.events.forEach(event=>{
@@ -354,12 +361,12 @@ class Main extends React.Component {
                 places={this.state.places}
                 selectedEvent={this.state.selectedEvent}
                 match={this.props.match}
-                selectEvent={this.state.selectEvent}
-                onMarkerClick={this.onMarkerClick}
+                selectEvent={this.selectEvent.bind(this)}
+                onMarkerClick={this.onMarkerClick.bind(this)}
               />
             </GoogleMap>
           </div>
-          <div className="event-list">
+          <div className={`event-list event-list-${this.state.isSearchPanelVisible ? 'is-visible' : 'is-hidden'}`}>
             <EventSearchControls
               onSearchBoxMounted={this.state.onSearchBoxMounted.bind(this)}
               bounds={this.state.bounds}
@@ -373,6 +380,9 @@ class Main extends React.Component {
               ordering={this.state.ordering}
               limit={this.state.limit}
             />
+            <div onClick={this.state.toggleSearchPanel} className="toggle-event-list">
+              {this.state.isSearchPanelVisible ? <i className="fa fa-chevron-left fa-2x" /> : <i className="fa fa-chevron-right fa-2x" />}
+            </div>
             <div className="event-list__container">
               <div className="event-list__items">
                 {this.state.loadingEvents ? 'Loading Events...' :
@@ -382,6 +392,8 @@ class Main extends React.Component {
                       events={this.state.events}
                       match={this.props.match}
                       selectedEvent={this.state.selectedEvent}
+                      selectEvent={this.selectEvent.bind(this)}
+                      centerEvent={this.centerEvent.bind(this)}
                     />
                     <PageControl
                       totalPages={parseInt(this.state.totalEvents / this.state.limit, 10)}

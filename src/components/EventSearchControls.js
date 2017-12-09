@@ -57,7 +57,7 @@ class EventSearchControls extends React.Component {
           Use My Location
         </button>
         <div onClick={this.state.toggleAdvanceSearchControls}>
-          {this.state.areAdvancedSearchControlsVisible ? "Hide Search Option" : "Search Search Options"}
+          {this.state.areAdvancedSearchControlsVisible ? "Hide Search Options" : "Search Search Options"}
         </div>
         {this.state.areAdvancedSearchControlsVisible ?
           <div className="form-fields">

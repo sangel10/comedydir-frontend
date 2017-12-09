@@ -1041,12 +1041,31 @@ td.rdtYear:hover {
   display: flex;
   height: calc(100vh - 3m); }
 
-.event-controls {
+.toggle-event-list {
   position: absolute;
+  top: 50px;
+  right: -30px;
+  width: 31px;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px;
+  border-radius: 0px 5px 5px 0;
+  cursor: pointer; }
+
+.event-list-is-hidden {
+  transform: translateX(-100%);
+  transition: 0.5s; }
+
+.event-list-is-visible {
+  transform: translateX(0%); }
+
+.event-list-is-hidden, .event-list-is-visible {
+  transition: 0.5s; }
+
+.event-controls {
   text-align: center;
-  width: 100%;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.8); }
+  background: white; }
 
 .event-list__container {
   position: relative;
@@ -1054,15 +1073,16 @@ td.rdtYear:hover {
   overflow: auto; }
 
 .event-list__items {
-  margin-top: 300px; }
+  margin-top: 20px; }
 
 .event-list {
   width: 33vw;
+  padding: 2em;
   margin: 0;
   float: right;
   position: absolute;
   top: 0;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.9);
   height: 100%; }
   .event-list img {
     width: 100%;
@@ -1091,7 +1111,6 @@ td.rdtYear:hover {
   height: 50px; }
 
 .event-item {
-  padding: 1em;
   border-bottom: 1px solid grey; }
 
 .form-fields {
