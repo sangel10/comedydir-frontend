@@ -1052,6 +1052,14 @@ td.rdtYear:hover {
   border-radius: 0px 5px 5px 0;
   cursor: pointer; }
 
+.toggle-event-list-mobile {
+  display: none;
+  text-align: center;
+  cursor: pointer; }
+  @media (max-width: 600px) {
+    .toggle-event-list-mobile {
+      display: inherit; } }
+
 .event-list-is-hidden {
   transform: translateX(-100%);
   transition: 0.5s; }
@@ -1073,7 +1081,8 @@ td.rdtYear:hover {
   overflow: auto; }
 
 .event-list__items {
-  margin-top: 20px; }
+  margin-top: 20px;
+  margin-bottom: 300px; }
 
 .event-list {
   width: 33vw;
@@ -1169,6 +1178,12 @@ td.rdtYear:hover {
   top: 0;
   margin: 10px;
   line-height: 48px; }
+
+.page-control {
+  text-align: center; }
+
+.pointer {
+  cursor: pointer; }
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;

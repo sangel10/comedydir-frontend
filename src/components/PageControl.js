@@ -21,11 +21,13 @@ class PageControl extends React.Component {
   render() {
     const pages = this.getPages()
     return (
-      <div>
-        Page 
-        {this.props.currentPage > 1 ? <span onClick={() => {this.props.onClick(this.props.currentPage - 1)}}> Prev</span> : null}
+      <div className="page-control">
+        Page
+        {this.props.currentPage > 1 ?
+          <span className="pointer" onClick={() => {this.props.onClick(this.props.currentPage - 1)}}> Prev</span> : null}
         {pages}
-        {this.props.hasNextPage ? <span onClick={() => {this.props.onClick(this.props.currentPage + 1)}}> Next</span> : null}
+        {this.props.hasNextPage ?
+          <span className="pointer" onClick={() => {this.props.onClick(this.props.currentPage + 1)}}> Next</span> : null}
       </div>
     )
   }

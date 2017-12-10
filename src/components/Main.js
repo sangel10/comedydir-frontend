@@ -367,6 +367,9 @@ class Main extends React.Component {
             </GoogleMap>
           </div>
           <div className={`event-list event-list-${this.state.isSearchPanelVisible ? 'is-visible' : 'is-hidden'}`}>
+            <div onClick={this.state.toggleSearchPanel} className="toggle-event-list-mobile">
+              {this.state.isSearchPanelVisible ? "See Map" : "Show List"}
+            </div>
             <EventSearchControls
               onSearchBoxMounted={this.state.onSearchBoxMounted.bind(this)}
               bounds={this.state.bounds}
@@ -387,7 +390,7 @@ class Main extends React.Component {
               <div className="event-list__items">
                 {this.state.loadingEvents ? 'Loading Events...' :
                   <div>
-                    <h3> Found {this.state.totalEvents} EVENTS:</h3>
+                    <p> Found {this.state.totalEvents} EVENTS:</p>
                     <EventList
                       events={this.state.events}
                       match={this.props.match}

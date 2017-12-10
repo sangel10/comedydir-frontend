@@ -56,9 +56,9 @@ class EventSearchControls extends React.Component {
           onClick={this.props.getUserLocation.bind(this)}>
           Use My Location
         </button>
-        <div onClick={this.state.toggleAdvanceSearchControls}>
+        <h6 onClick={this.state.toggleAdvanceSearchControls} className="pointer">
           {this.state.areAdvancedSearchControlsVisible ? "Hide Search Options" : "Search Search Options"}
-        </div>
+        </h6>
         {this.state.areAdvancedSearchControlsVisible ?
           <div className="form-fields">
             <label htmlFor="datepicker">Start Date</label>

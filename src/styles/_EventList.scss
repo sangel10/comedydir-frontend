@@ -20,6 +20,15 @@
   cursor: pointer;
 }
 
+.toggle-event-list-mobile {
+  display: none;
+  text-align: center;
+  cursor: pointer;
+  @media (max-width: 600px) {
+    display: inherit;
+  }
+}
+
 .event-list-is-hidden {
   transform: translateX(-100%);
   transition: 0.5s;
@@ -49,6 +58,7 @@
 
 .event-list__items {
   margin-top: 20px;
+  margin-bottom: 300px;
 }
 
 .event-list {

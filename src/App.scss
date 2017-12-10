@@ -4,9 +4,14 @@
 
 @import 'src/styles/EventList';
 @import 'src/styles/Menu';
+@import 'src/styles/PageControl';
 
 .app {
   // text-align: center;
+}
+
+.pointer {
+  cursor: pointer;
 }
 
 .App-logo {
