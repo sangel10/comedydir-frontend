@@ -2,25 +2,31 @@ import React from 'react'
 import moment from 'moment'
 import axios from 'axios'
 import _ from 'lodash'
-import { GoogleMap, withGoogleMap, withScriptjs } from 'react-google-maps'
-import EventSearchControls from "./EventSearchControls"
+import { withGoogleMap, withScriptjs } from 'react-google-maps'
 import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
+import queryString from 'query-string'
+
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   return <div>{props.children}</div>
 }))
 
-class PlainEventList extends React.Component {
+class PlainEvents extends React.Component {
   constructor(props) {
     super(props)
     const start = moment().startOf('hour')
     this.customRefs = {}
     this.state = {
-      center: null,
-      pageTitle: null,
+      center: {},
+      placeName: null,
       country: null,
       region: null,
       startTime: start,
       events: [],
+      loading: false,
+      radius: 10,
+      days: 14,
+      page: 1,
+      ordering: 'start_time',
       onSearchBoxMounted: ref => {
         this.customRefs.searchBox = ref
       },
@@ -50,8 +56,113 @@ class PlainEventList extends React.Component {
     }
   }
 
-  getEvents(lat=null, lng=null) {
+  componentDidMount() {
+    this.getUserLocation()
+  }
 
+  componentDidUpdate(prevProps, prevState) {
+    const valuesToWatch = ['center']
+    for (const value of valuesToWatch) {
+      if (this.state[value] !== prevState[value]) {
+        console.log('value changed', value)
+        this.getEvents()
+        break
+      }
+    }
+  }
+
+  getLocationFromCoordinates(lat, lng) {
+    this.setState({loading: true})
+    const geocoder = new window.google.maps.Geocoder()
+    var latlng = new window.google.maps.LatLng(lat, lng)
+
+    geocoder.geocode({'latLng': latlng}, (results, status) => {
+      if (status === window.google.maps.GeocoderStatus.OK) {
+        if (results[1]) {
+          this.setState({
+            placeName: results[0].formatted_address,
+            loading: false,
+          })
+        }
+        else {
+          console.log("No results found")
+        }
+      }
+      else {
+        console.log("Geocoder failed due to: ", status)
+      }
+    })
+  }
+
+  getUserLocation() {
+    if (navigator.geolocation) {
+      this.setState({loading: true})
+      navigator.geolocation.getCurrentPosition((position) => {
+        var pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        }
+        this.setState({
+          center: {lat: parseFloat(pos.lat, 10), lng: parseFloat(pos.lng, 10)},
+          loading: false,
+        })
+        // this.getLocationFromCoordinates(pos.lat, pos.lng)
+        // this.getEvents(parseFloat(pos.lat, 10), parseFloat(pos.lng, 10))
+      }, () => {
+        // handleLocationError(true, infoWindow, map.getCenter());
+      })
+    }
+  }
+
+  getCenterAsValues(latitude, longitude) {
+    const lat = latitude || (typeof this.state.center.lat === 'number' && this.state.center.lat) || this.state.center.lat() || undefined
+    const lng = longitude || (typeof this.state.center.lng === 'number' && this.state.center.lng) || this.state.center.lng() || undefined
+    return {lat, lng}
+  }
+
+  getEvents(latitude, longitude) {
+    this.setState({loading: true})
+    const baseUrl = `${process.env.REACT_APP_BACKEND_API_URL}/events/events/`
+    const queryParams={}
+    // TODO: fix this
+    // This is a hack, since sometimes the center is created using google maps and sometimes it's made by hand
+    // e.g. when we set the center based on query params
+    // const lat = latitude || (typeof this.state.center.lat === 'number' && this.state.center.lat) || this.state.center.lat() || undefined
+    // const lng = longitude || (typeof this.state.center.lng === 'number' && this.state.center.lng) || this.state.center.lng() || undefined
+    const {lat, lng} = this.getCenterAsValues(latitude, longitude)
+    if (!lat || !lng) {
+      return
+    }
+    queryParams.radius = this.state.radius || undefined
+    queryParams.start_time = this.state.startTime ? this.state.startTime.unix() : undefined
+    queryParams.latitude = lat
+    queryParams.longitude = lng
+    queryParams.days = this.state.days || undefined
+    queryParams.page = this.state.page || undefined
+    queryParams.ordering = this.state.ordering || undefined
+    const params = queryString.stringify(queryParams)
+    const url = `${baseUrl}?${params}`
+    axios.get(url)
+      .then(response =>{
+        this.setState({
+          events: response.data.results,
+          hasNextPage: response.data.next !== null,
+          totalEvents: response.data.count
+        })
+        // this.state.getLocationFromEvents()
+        this.setState({loading: false})
+      })
+      .catch(error=> {
+        this.setState({loading: false})
+        console.log(error)
+      })
+
+    let locationParams = _.pick(queryParams, 'latitude', 'longitude')
+    locationParams.place_name = this.state.placeName || undefined
+    locationParams = queryString.stringify(locationParams)
+    // window.history.pushState({}, "", `/events?${locationParams}`)
+    // this.props.history.push(`/events?${locationParams}`)
+    // <Redirect to={`/events?${locationParams}`} />
   }
 
 
@@ -66,21 +177,29 @@ class PlainEventList extends React.Component {
         >
           <StandaloneSearchBox
             ref={this.state.onSearchBoxMounted}
-            bounds={this.state.bounds}
-            onPlacesChanged={this.state.onPlacesChanged}
+            onPlacesChanged={this.state.onPlacesChanged.bind(this)}
           >
             <input
               type="text"
               placeholder="Find Comedy Near..."
             />
           </StandaloneSearchBox>
-          <button>Use My Location</button>
+          <button onClick={this.getUserLocation.bind(this)}>Use My Location</button>
           <input type="submit" value="search"/>
-          <div>EVENTS HERE</div>
+          <h1> {this.state.placeName}</h1>
+          <h1> {_.get(this.state, 'center.lat', '')} {_.get(this.state, 'center.lng')}</h1>
+          <div>
+            {
+              this.state.events.map((event)=> {
+                return <div key={event.id}>{event.name}</div>
+              })
+            }
+          </div>
+          <div>{this.state.loading ? 'LOADING' : 'NOT LOADING'}</div>
         </GoogleMapsWrapper>
       </div>
     )
   }
 }
 
-export default PlainEventList
+export default PlainEvents
