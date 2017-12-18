@@ -5,6 +5,9 @@ import _ from 'lodash'
 import { withGoogleMap, withScriptjs } from 'react-google-maps'
 import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
 import queryString from 'query-string'
+import PlainEventList from './PlainEventList'
+import LoadingSpinner from './LoadingSpinner'
+import Helmet from 'react-helmet'
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   return <div>{props.children}</div>
@@ -26,6 +29,7 @@ class PlainEvents extends React.Component {
       radius: 10,
       days: 14,
       page: 1,
+      loadingMessage: "Loading...",
       ordering: 'start_time',
       onSearchBoxMounted: ref => {
         this.customRefs.searchBox = ref
@@ -72,13 +76,14 @@ class PlainEvents extends React.Component {
   }
 
   getLocationFromCoordinates(lat, lng) {
-    this.setState({loading: true})
+    this.setState({loading: true, loadingMessage: "Identifying your location"})
     const geocoder = new window.google.maps.Geocoder()
     var latlng = new window.google.maps.LatLng(lat, lng)
 
     geocoder.geocode({'latLng': latlng}, (results, status) => {
       if (status === window.google.maps.GeocoderStatus.OK) {
         if (results[1]) {
+          console.log('results of geocode', results[1], results[0].formatted_address)
           this.setState({
             placeName: results[0].formatted_address,
             loading: false,
@@ -96,7 +101,7 @@ class PlainEvents extends React.Component {
 
   getUserLocation() {
     if (navigator.geolocation) {
-      this.setState({loading: true})
+      this.setState({loading: true, loadingMessage: "Finding your location"})
       navigator.geolocation.getCurrentPosition((position) => {
         var pos = {
           lat: position.coords.latitude,
@@ -106,7 +111,7 @@ class PlainEvents extends React.Component {
           center: {lat: parseFloat(pos.lat, 10), lng: parseFloat(pos.lng, 10)},
           loading: false,
         })
-        // this.getLocationFromCoordinates(pos.lat, pos.lng)
+        this.getLocationFromCoordinates(pos.lat, pos.lng)
         // this.getEvents(parseFloat(pos.lat, 10), parseFloat(pos.lng, 10))
       }, () => {
         // handleLocationError(true, infoWindow, map.getCenter());
@@ -121,7 +126,7 @@ class PlainEvents extends React.Component {
   }
 
   getEvents(latitude, longitude) {
-    this.setState({loading: true})
+    this.setState({loading: true, loadingMessage: `Find Events Near ${this.state.placeName}`})
     const baseUrl = `${process.env.REACT_APP_BACKEND_API_URL}/events/events/`
     const queryParams={}
     // TODO: fix this
@@ -167,8 +172,10 @@ class PlainEvents extends React.Component {
 
 
   render() {
+    const title = this.state.placeName ? `Comedy events near: ${this.state.placeName}` : 'findlivecomedy.com'
     return (
       <div>
+        <Helmet title={title} />
         <GoogleMapsWrapper
           googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAP_KEY}&libraries=geometry,drawing,places`} // libraries=geometry,drawing,places
           loadingElement={<div style={{ height: `100%`, width: `100%` }} >LOADING</div>}
@@ -186,16 +193,9 @@ class PlainEvents extends React.Component {
           </StandaloneSearchBox>
           <button onClick={this.getUserLocation.bind(this)}>Use My Location</button>
           <input type="submit" value="search"/>
-          <h1> {this.state.placeName}</h1>
-          <h1> {_.get(this.state, 'center.lat', '')} {_.get(this.state, 'center.lng')}</h1>
-          <div>
-            {
-              this.state.events.map((event)=> {
-                return <div key={event.id}>{event.name}</div>
-              })
-            }
-          </div>
-          <div>{this.state.loading ? 'LOADING' : 'NOT LOADING'}</div>
+          {this.state.placeName ? <h1>{title}</h1> : null}
+          <PlainEventList events={this.state.events} />
+          <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>
         </GoogleMapsWrapper>
       </div>
     )
