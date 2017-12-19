@@ -8,6 +8,8 @@ import PlainEventList from './PlainEventList'
 import LoadingSpinner from './LoadingSpinner'
 import Helmet from 'react-helmet'
 import PlainEventSearchControls from './PlainEventSearchControls'
+import PlainEventDetail from './PlainEventDetail'
+import { Route, Switch } from 'react-router-dom'
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   return <div>{props.children}</div>
@@ -60,6 +62,9 @@ class PlainEvents extends React.Component {
   }
 
   componentDidMount() {
+    if (this.props.match.params.eventSlug) {
+      return
+    }
     this.getUserLocation()
   }
 
@@ -171,7 +176,7 @@ class PlainEvents extends React.Component {
     locationParams.place_name = this.state.placeName || undefined
     locationParams = queryString.stringify(locationParams)
     // window.history.pushState({}, "", `/events?${locationParams}`)
-    // this.props.history.push(`/events?${locationParams}`)
+    this.props.history.push(`/plain?${locationParams}`)
     // <Redirect to={`/events?${locationParams}`} />
   }
 
@@ -197,6 +202,8 @@ class PlainEvents extends React.Component {
 
   render() {
     const title = this.state.placeName ? `Comedy events near: ${this.state.placeName}` : 'findlivecomedy.com'
+    const eventData = this.props.match.params.eventSlug ? <PlainEventDetail eventSlug={this.props.match.params.eventSlug}/> : <PlainEventList events={this.state.events}/>
+    console.log('prop', this.props.match)
     return (
       <div className="plain-events-container">
         <Helmet title={title} />
@@ -222,7 +229,7 @@ class PlainEvents extends React.Component {
             placeName={this.state.placeName}
             customRefs={this.customRefs}
           />
-          <PlainEventList events={this.state.events} />
+          {eventData}
           <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>
         </GoogleMapsWrapper>
       </div>

@@ -8,7 +8,7 @@ class PlainEventItem extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      isExpanded: false,
+      isExpanded: this.props.isExpanded,
       toggleExpanded: (e)=>{
         e.preventDefault()
         this.setState({isExpanded: !this.state.isExpanded})
@@ -42,6 +42,7 @@ class PlainEventItem extends React.Component {
             <p>
               {this.props.event.description}
             </p>
+            {this.props.event.facebook_id ? <a target="_blank" href={`//facebook.com/${this.props.event.facebook_id}`}>See event on Facebook</a> : null}
           </div>
         }
       </div>
@@ -53,4 +54,5 @@ export default PlainEventItem
 
 PlainEventItem.propTypes = {
   event: PropTypes.object.isRequired,
+  isExpanded: PropTypes.bool.isRequired,
 }

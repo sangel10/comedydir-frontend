@@ -10,7 +10,7 @@ class PlainEventList extends React.Component {
       <div>
         {
           this.props.events.map((event) => {
-            return <PlainEventItem key={event.pk} event={event}/>
+            return <PlainEventItem key={event.pk} event={event} isExpanded={false}/>
           })
         }
       </div>
