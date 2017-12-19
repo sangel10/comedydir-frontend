@@ -76,6 +76,13 @@ class PlainEvents extends React.Component {
   }
 
   getLocationFromCoordinates(lat, lng) {
+    // Hacky solution to a race condition
+    if (!window.google || !window.google.maps) {
+      window.setTimeout(()=> {
+        this.getLocationFromCoordinates(lat, lng)
+      }, 100)
+      return
+    }
     this.setState({loading: true, loadingMessage: "Identifying your location"})
     const geocoder = new window.google.maps.Geocoder()
     var latlng = new window.google.maps.LatLng(lat, lng)
