@@ -3,7 +3,6 @@ import moment from 'moment'
 import axios from 'axios'
 import _ from 'lodash'
 import { withGoogleMap, withScriptjs } from 'react-google-maps'
-import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
 import queryString from 'query-string'
 import PlainEventList from './PlainEventList'
 import LoadingSpinner from './LoadingSpinner'
@@ -221,16 +220,6 @@ class PlainEvents extends React.Component {
             limit={this.state.limit}
             onSubmit={this.getEvents.bind(this)}
           />
-          <StandaloneSearchBox
-            ref={this.state.onSearchBoxMounted}
-            onPlacesChanged={this.state.onPlacesChanged.bind(this)}
-          >
-            <input
-              type="text"
-              placeholder="Find Comedy Near..."
-            />
-          </StandaloneSearchBox>
-          <button onClick={this.getUserLocation.bind(this)}>Use My Location</button>
           {this.state.placeName ? <h1>{title}</h1> : null}
           <PlainEventList events={this.state.events} />
           <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>
