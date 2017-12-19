@@ -22,7 +22,7 @@ const ComedyDirectoryApp = () => (
       <Menu>
         <a id="about" className="menu-item" href="/about">About</a>
         <a id="add-shows" className="menu-item" href="//www.facebook.com/groups/1814445198866527/">Add A Show</a>
-        <a id="newsletter" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true">Get E-mail Notification About Shows Near You</a>
+        <a id="newsletter" target="_blank" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true">Get E-mail Notification About Shows Near You</a>
         <a id="support" className="menu-item" href="/support">Support</a>
       </Menu>
     </div>

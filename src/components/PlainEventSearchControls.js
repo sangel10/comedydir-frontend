@@ -67,10 +67,12 @@ class PlainEventSearchControls extends React.Component {
           Use My Location
         </button>
         <button type="submit" value="search" onClick={this.props.onSubmit.bind(this)}>Refresh</button>
-        <a id="newsletter" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true"><button>Get Notified!</button></a>
-        <h6 onClick={this.state.toggleAdvanceSearchControls} className="pointer">
-          {this.state.areAdvancedSearchControlsVisible ? <span className="underlined">Hide Search Options</span> : searchOptionsString }
-        </h6>
+        <a id="newsletter" target="_blank" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true"><button>Get Notified!</button></a>
+        {this.props.eventSlug ? null :
+          <h6 onClick={this.state.toggleAdvanceSearchControls} className="pointer">
+            {this.state.areAdvancedSearchControlsVisible ? <span className="underlined">Hide Search Options</span> : searchOptionsString }
+          </h6>
+        }
         {this.state.areAdvancedSearchControlsVisible ?
           <div className="form-fields">
             <label htmlFor="datepicker">Start Date</label>
@@ -126,4 +128,5 @@ PlainEventSearchControls.propTypes = {
   ordering: PropTypes.string.isRequired,
   placeName: PropTypes.string,
   customRefs: PropTypes.object,
+  eventSlug: PropTypes.string,
 }

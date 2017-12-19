@@ -229,6 +229,7 @@ class PlainEvents extends React.Component {
             onSubmit={this.getEvents.bind(this)}
             placeName={this.state.placeName}
             customRefs={this.customRefs}
+            eventSlug={this.props.match.params.eventSlug}
           />
           <Switch>
             <Route exact path="/plain/" render={()=> <PlainEventList events={this.state.events}/>}/>

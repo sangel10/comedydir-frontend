@@ -1128,7 +1128,8 @@ td.rdtYear:hover {
 
 .menu-container {
   position: fixed;
-  z-index: 200; }
+  z-index: 200;
+  top: 0; }
 
 /* Position and sizing of burger button */
 .bm-burger-button {
@@ -1215,8 +1216,6 @@ td.rdtYear:hover {
   padding-bottom: 1em;
   padding-top: 1em; }
   .plain-event-item h3 {
-    margin-bottom: 0; }
-  .plain-event-item a h3 {
     margin-bottom: 0; }
 
 .plain-event-search-controls button {
