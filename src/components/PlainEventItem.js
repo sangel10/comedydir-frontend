@@ -30,6 +30,7 @@ class PlainEventItem extends React.Component {
         <div>{moment(this.props.event.start_time).format("dddd, MMMM Do YYYY")}</div>
         <div>{this.props.event.facebook_place.facebook_name}</div>
         <div>{this.props.event.facebook_place.facebook_street}, {this.props.event.facebook_place.facebook_city}</div>
+        <div>{Math.round(this.props.event.facebook_place.distance * 10) / 10 } km away</div>
         {expandUI}
         {!this.state.isExpanded ? null :
           <div>

@@ -64,7 +64,7 @@ class PlainEvents extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const valuesToWatch = ['center', 'startTime', 'radius', 'days', ]
+    const valuesToWatch = ['center', 'startTime', 'radius', 'days', 'ordering' ]
     for (const value of valuesToWatch) {
       if (this.state[value] !== prevState[value]) {
         this.getEvents()
