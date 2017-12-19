@@ -38,6 +38,15 @@
 
 .react-datepicker-popper {
   transform: translate3d(78px, 175px, 0px) scale(1.5) !important;
+  width: 100%;
+  @media (max-width: 600px) {
+    width: inherit;
+    transform: translate3d(78px, 175px, 0px) scale(1) !important;
+  }
+}
+
+.react-datepicker__triangle {
+  display: none;
 }
 
 header, footer {
