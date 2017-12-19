@@ -62,10 +62,9 @@ class PlainEvents extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.match.params.eventSlug) {
-      return
+    if (!this.props.match.params.eventSlug) {
+      this.getUserLocation()
     }
-    this.getUserLocation()
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -141,6 +140,9 @@ class PlainEvents extends React.Component {
   }
 
   getEvents(latitude, longitude) {
+    if ((!latitude || !latitude) && (!this.state.center.lat || !this.state.center.lat)) {
+      this.getUserLocation()
+    }
     this.setState({loading: true, loadingMessage: `Find Events Near ${this.state.placeName}`})
     const baseUrl = `${process.env.REACT_APP_BACKEND_API_URL}/events/events/`
     const queryParams={}
@@ -202,7 +204,6 @@ class PlainEvents extends React.Component {
 
   render() {
     const title = this.state.placeName ? `Comedy events near: ${this.state.placeName}` : 'findlivecomedy.com'
-    const eventData = this.props.match.params.eventSlug ? <PlainEventDetail eventSlug={this.props.match.params.eventSlug}/> : <PlainEventList events={this.state.events}/>
     console.log('prop', this.props.match)
     return (
       <div className="plain-events-container">
@@ -229,7 +230,10 @@ class PlainEvents extends React.Component {
             placeName={this.state.placeName}
             customRefs={this.customRefs}
           />
-          {eventData}
+          <Switch>
+            <Route exact path="/plain/" render={()=> <PlainEventList events={this.state.events}/>}/>
+            <Route path="/plain/:eventSlug" render={()=><PlainEventDetail eventSlug={this.props.match.params.eventSlug}/>}/>
+          </Switch>
           <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>
         </GoogleMapsWrapper>
       </div>
