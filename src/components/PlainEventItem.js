@@ -28,9 +28,9 @@ class PlainEventItem extends React.Component {
         <Link key={this.props.event.name} to={`/plain/${this.props.event.slug}`}><h3>{this.props.event.name}</h3></Link>
         <div>{moment(this.props.event.start_time).format("h:mma")}</div>
         <div>{moment(this.props.event.start_time).format("dddd, MMMM Do YYYY")}</div>
-        <div>{this.props.event.facebook_place.facebook_name}</div>
         <div>
           <a target="_blank" href={`//www.google.com/maps/search/?api=1&query="${this.props.event.facebook_place.facebook_name} ${this.props.event.facebook_place.facebook_street} ${this.props.event.facebook_place.facebook_city} ${this.props.event.facebook_place.facebook_country}"`}>
+            <div>{this.props.event.facebook_place.facebook_name}</div>
             {this.props.event.facebook_place.facebook_street}, {this.props.event.facebook_place.facebook_city}
           </a>
         </div>

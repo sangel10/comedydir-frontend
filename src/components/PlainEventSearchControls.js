@@ -67,6 +67,7 @@ class PlainEventSearchControls extends React.Component {
           Use My Location
         </button>
         <button type="submit" value="search" onClick={this.props.onSubmit.bind(this)}>Refresh</button>
+        <a id="newsletter" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true"><button>Get Notified!</button></a>
         <h6 onClick={this.state.toggleAdvanceSearchControls} className="pointer">
           {this.state.areAdvancedSearchControlsVisible ? <span className="underlined">Hide Search Options</span> : searchOptionsString }
         </h6>
