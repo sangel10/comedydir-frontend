@@ -12,7 +12,6 @@ class Detail extends React.Component {
   }
 
   componentDidMount() {
-    console.log('component did mount')
     this.getEvent(this.props.eventSlug)
   }
 
@@ -20,10 +19,8 @@ class Detail extends React.Component {
     const eventId = slug.split('-')[0]
     const url = `${process.env.REACT_APP_BACKEND_API_URL}/events/events/${eventId}`
     this.setState({loadingEvents: true})
-    console.log('get event')
     axios.get(url)
       .then(response =>{
-        console.log('selected event RESPONSE', response)
         this.setState({
           event: response.data,
         })
@@ -32,7 +29,6 @@ class Detail extends React.Component {
 
 
   render() {
-    console.log('did rentder');
     return (
       <div>
         {this.state.event ? <PlainEventItem event={this.state.event} isExpanded={true}/> : null }
