@@ -32,7 +32,7 @@ const ComedyDirectoryApp = () => (
           <Route path="/events/:eventSlug?" component={Main}/>
           <Route path="/plain/:eventSlug?" component={PlainEvents}/>
           <Route path="/">
-            <Redirect to="/events"/>
+            <Redirect to="/plain"/>
           </Route>
         </Switch>
       </div>

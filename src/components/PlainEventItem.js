@@ -24,12 +24,16 @@ class PlainEventItem extends React.Component {
   render() {
     const expandUI = <button onClick={(e)=>{this.state.toggleExpanded(e)}}>{this.state.isExpanded ? `-` : `+`}</button>
     return (
-      <Link key={this.props.event.name} to={`/plain/${this.props.event.slug}`} className="plain-event-item">
-        <h3>{this.props.event.name}</h3>
+      <div className="plain-event-item">
+        <Link key={this.props.event.name} to={`/plain/${this.props.event.slug}`}><h3>{this.props.event.name}</h3></Link>
         <div>{moment(this.props.event.start_time).format("h:mma")}</div>
         <div>{moment(this.props.event.start_time).format("dddd, MMMM Do YYYY")}</div>
         <div>{this.props.event.facebook_place.facebook_name}</div>
-        <div>{this.props.event.facebook_place.facebook_street}, {this.props.event.facebook_place.facebook_city}</div>
+        <div>
+          <a target="_blank" href={`//www.google.com/maps/search/?api=1&query="${this.props.event.facebook_place.facebook_name} ${this.props.event.facebook_place.facebook_street} ${this.props.event.facebook_place.facebook_city} ${this.props.event.facebook_place.facebook_country}"`}>
+            {this.props.event.facebook_place.facebook_street}, {this.props.event.facebook_place.facebook_city}
+          </a>
+        </div>
         <div>{Math.round(this.props.event.facebook_place.distance * 10) / 10 } km away</div>
         {expandUI}
         {!this.state.isExpanded ? null :
@@ -40,7 +44,7 @@ class PlainEventItem extends React.Component {
             </p>
           </div>
         }
-      </Link>
+      </div>
     )
   }
 }
