@@ -8,6 +8,7 @@ import queryString from 'query-string'
 import PlainEventList from './PlainEventList'
 import LoadingSpinner from './LoadingSpinner'
 import Helmet from 'react-helmet'
+import PlainEventSearchControls from './PlainEventSearchControls'
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
   return <div>{props.children}</div>
@@ -21,16 +22,15 @@ class PlainEvents extends React.Component {
     this.state = {
       center: {},
       placeName: null,
-      country: null,
-      region: null,
       startTime: start,
       events: [],
       loading: false,
       radius: 10,
       days: 14,
       page: 1,
-      loadingMessage: "Loading...",
       ordering: 'start_time',
+      limit: 50,
+      loadingMessage: "Loading...",
       onSearchBoxMounted: ref => {
         this.customRefs.searchBox = ref
       },
@@ -65,10 +65,9 @@ class PlainEvents extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const valuesToWatch = ['center']
+    const valuesToWatch = ['center', 'startTime', 'radius', 'days', ]
     for (const value of valuesToWatch) {
       if (this.state[value] !== prevState[value]) {
-        console.log('value changed', value)
         this.getEvents()
         break
       }
@@ -90,7 +89,6 @@ class PlainEvents extends React.Component {
     geocoder.geocode({'latLng': latlng}, (results, status) => {
       if (status === window.google.maps.GeocoderStatus.OK) {
         if (results[1]) {
-          console.log('results of geocode', results[1], results[0].formatted_address)
           this.setState({
             placeName: results[0].formatted_address,
             loading: false,
@@ -177,6 +175,25 @@ class PlainEvents extends React.Component {
     // <Redirect to={`/events?${locationParams}`} />
   }
 
+  onDatetimeChange(variable, e) {
+    const obj = {}
+    // Round to the nearest hour to prevent cache busting by unique timestamps
+    obj[variable] = moment(e._d).startOf('hour')
+    obj.useCustomStartTime = true
+    this.setState(obj)
+  }
+
+  updateSelect(key, e) {
+    if (!e || !e.value) {
+      return
+    }
+    const obj = {}
+    obj[key] = e.value
+    // reset page when search params change
+    obj.page = 1
+    this.setState(obj)
+  }
+
 
   render() {
     const title = this.state.placeName ? `Comedy events near: ${this.state.placeName}` : 'findlivecomedy.com'
@@ -189,6 +206,19 @@ class PlainEvents extends React.Component {
           containerElement={<div style={{ height: `95vh`, width: `100vw` }} >CONTAINER</div>}
           mapElement={<div style={{ height: `0`, width: `0`}} >MAP</div>}
         >
+          <PlainEventSearchControls
+            onSearchBoxMounted={this.state.onSearchBoxMounted.bind(this)}
+            bounds={this.state.bounds}
+            onPlacesChanged={this.state.onPlacesChanged.bind(this)}
+            getUserLocation={this.getUserLocation.bind(this)}
+            onDatetimeChange={this.onDatetimeChange.bind(this)}
+            updateSelect={this.updateSelect.bind(this)}
+            startTime={this.state.startTime}
+            radius={this.state.radius}
+            days={this.state.days}
+            ordering={this.state.ordering}
+            limit={this.state.limit}
+          />
           <StandaloneSearchBox
             ref={this.state.onSearchBoxMounted}
             onPlacesChanged={this.state.onPlacesChanged.bind(this)}
@@ -199,7 +229,7 @@ class PlainEvents extends React.Component {
             />
           </StandaloneSearchBox>
           <button onClick={this.getUserLocation.bind(this)}>Use My Location</button>
-          <input type="submit" value="search"/>
+          <input type="submit" value="search" onClick={this.getEvents.bind(this)}/>
           {this.state.placeName ? <h1>{title}</h1> : null}
           <PlainEventList events={this.state.events} />
           <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>
