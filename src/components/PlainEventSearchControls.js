@@ -55,6 +55,7 @@ class PlainEventSearchControls extends React.Component {
           onClick={this.props.getUserLocation.bind(this)}>
           Use My Location
         </button>
+        <input type="submit" value="search" onClick={this.props.onSubmit.bind(this)}/>
         <h6 onClick={this.state.toggleAdvanceSearchControls} className="pointer">
           {this.state.areAdvancedSearchControlsVisible ? "Hide Search Options" : "Search Search Options"}
         </h6>
@@ -105,6 +106,7 @@ PlainEventSearchControls.propTypes = {
   onPlacesChanged: PropTypes.func.isRequired,
   getUserLocation: PropTypes.func.isRequired,
   onDatetimeChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   startTime: PropTypes.object.isRequired,
   radius: PropTypes.number.isRequired,
   updateSelect: PropTypes.func.isRequired,

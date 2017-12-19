@@ -125,20 +125,21 @@ class PlainEvents extends React.Component {
   }
 
   getCenterAsValues(latitude, longitude) {
-    const lat = latitude || (typeof this.state.center.lat === 'number' && this.state.center.lat) || this.state.center.lat() || undefined
-    const lng = longitude || (typeof this.state.center.lng === 'number' && this.state.center.lng) || this.state.center.lng() || undefined
-    return {lat, lng}
+    // TODO: fix this
+    // This is a hack, since sometimes the center is created using google maps and sometimes it's made by hand
+    // e.g. when we set the center based on query params
+    if (latitude && longitude) {
+      return {lat: latitude, lng: longitude}
+    }
+    const lat = (typeof this.state.center.lat === 'number' && this.state.center.lat) || this.state.center.lat() || undefined
+    const lng = (typeof this.state.center.lng === 'number' && this.state.center.lng) || this.state.center.lng() || undefined
+    return {lat: lat, lng: lng}
   }
 
   getEvents(latitude, longitude) {
     this.setState({loading: true, loadingMessage: `Find Events Near ${this.state.placeName}`})
     const baseUrl = `${process.env.REACT_APP_BACKEND_API_URL}/events/events/`
     const queryParams={}
-    // TODO: fix this
-    // This is a hack, since sometimes the center is created using google maps and sometimes it's made by hand
-    // e.g. when we set the center based on query params
-    // const lat = latitude || (typeof this.state.center.lat === 'number' && this.state.center.lat) || this.state.center.lat() || undefined
-    // const lng = longitude || (typeof this.state.center.lng === 'number' && this.state.center.lng) || this.state.center.lng() || undefined
     const {lat, lng} = this.getCenterAsValues(latitude, longitude)
     if (!lat || !lng) {
       return
@@ -218,6 +219,7 @@ class PlainEvents extends React.Component {
             days={this.state.days}
             ordering={this.state.ordering}
             limit={this.state.limit}
+            onSubmit={this.getEvents.bind(this)}
           />
           <StandaloneSearchBox
             ref={this.state.onSearchBoxMounted}
@@ -229,7 +231,6 @@ class PlainEvents extends React.Component {
             />
           </StandaloneSearchBox>
           <button onClick={this.getUserLocation.bind(this)}>Use My Location</button>
-          <input type="submit" value="search" onClick={this.getEvents.bind(this)}/>
           {this.state.placeName ? <h1>{title}</h1> : null}
           <PlainEventList events={this.state.events} />
           <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>
