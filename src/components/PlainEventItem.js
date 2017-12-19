@@ -24,16 +24,16 @@ class PlainEventItem extends React.Component {
   render() {
     const expandUI = <button onClick={(e)=>{this.state.toggleExpanded(e)}}>{this.state.isExpanded ? `-` : `+`}</button>
     return (
-      <Link key={this.props.event.name} to={`/plain/${this.props.event.slug}`}>
+      <Link key={this.props.event.name} to={`/plain/${this.props.event.slug}`} className="plain-event-item">
         <h3>{this.props.event.name}</h3>
-        <div>{moment(this.props.event.start_time).format("dddd, MMMM Do YYYY, h:mm a")}</div>
-        <div>{this.props.event.facebook_place.facebook_name} {this.props.event.facebook_place.facebook_street}</div>
+        <div>{moment(this.props.event.start_time).format("h:mma")}</div>
+        <div>{moment(this.props.event.start_time).format("dddd, MMMM Do YYYY")}</div>
+        <div>{this.props.event.facebook_place.facebook_name}</div>
+        <div>{this.props.event.facebook_place.facebook_street}, {this.props.event.facebook_place.facebook_city}</div>
         {expandUI}
         {!this.state.isExpanded ? null :
           <div>
             <img src={this.props.event.image_url} alt="this.props.event art"/>
-            <div>{moment(this.props.event.start_time).format("dddd, MMMM Do YYYY, h:mm a")}</div>
-            <span>{this.props.event.facebook_place.facebook_city}, {this.props.event.facebook_place.facebook_country}</span>
             <p>
               {this.props.event.description}
             </p>

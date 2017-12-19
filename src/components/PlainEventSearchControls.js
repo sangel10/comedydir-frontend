@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import moment from 'moment'
 import { StandaloneSearchBox } from "react-google-maps/lib/components/places/StandaloneSearchBox"
 import DatePicker from 'react-datepicker'
 import Select from 'react-select'
@@ -12,6 +13,13 @@ class PlainEventSearchControls extends React.Component {
       toggleAdvanceSearchControls: () =>{
         this.setState({areAdvancedSearchControlsVisible: !this.state.areAdvancedSearchControlsVisible})
       }
+    }
+  }
+
+  componentDidUpdate(lastProps) {
+    if (lastProps.placeName !== this.props.placeName) {
+      // Hack, but if we bind it to the value it won't let us search with autocomplete
+      window.document.getElementById('searchbox').value = this.props.placeName
     }
   }
 
@@ -40,14 +48,17 @@ class PlainEventSearchControls extends React.Component {
       { value: 'distance_from_target', label: 'Distance', clearableValue: false},
       { value: 'start_time', label: 'Start time', clearableValue: false},
     ]
+    const searchOptionsString = (<div className="pointer">Showing comedy events within <span className="underlined">{this.props.radius} km</span> of <span>{this.props.placeName}</span> and starting on <span className="underlined">{moment(this.props.start_time).format("dddd, MMMM Do YYYY, h:mm a")}</span> and spanning <span className="underlined">{this.props.days} days</span>, sorted by <span className="underlined">{this.props.ordering}</span> (change)</div>)
     return (
-      <div className="event-controls">
+      <div className="plain-event-search-controls">
         <StandaloneSearchBox
           ref={this.props.onSearchBoxMounted}
           onPlacesChanged={this.props.onPlacesChanged}
         >
           <input
             type="text"
+            className="searchbox"
+            id="searchbox"
             placeholder="Find Comedy Near..."
           />
         </StandaloneSearchBox>
@@ -55,9 +66,9 @@ class PlainEventSearchControls extends React.Component {
           onClick={this.props.getUserLocation.bind(this)}>
           Use My Location
         </button>
-        <input type="submit" value="search" onClick={this.props.onSubmit.bind(this)}/>
+        <button type="submit" value="search" onClick={this.props.onSubmit.bind(this)}>Refresh</button>
         <h6 onClick={this.state.toggleAdvanceSearchControls} className="pointer">
-          {this.state.areAdvancedSearchControlsVisible ? "Hide Search Options" : "Search Search Options"}
+          {this.state.areAdvancedSearchControlsVisible ? <span className="underlined">Hide Search Options</span> : searchOptionsString }
         </h6>
         {this.state.areAdvancedSearchControlsVisible ?
           <div className="form-fields">
@@ -112,4 +123,6 @@ PlainEventSearchControls.propTypes = {
   updateSelect: PropTypes.func.isRequired,
   days: PropTypes.number.isRequired,
   ordering: PropTypes.string.isRequired,
+  placeName: PropTypes.string,
+  customRefs: PropTypes.object,
 }

@@ -198,12 +198,12 @@ class PlainEvents extends React.Component {
   render() {
     const title = this.state.placeName ? `Comedy events near: ${this.state.placeName}` : 'findlivecomedy.com'
     return (
-      <div>
+      <div className="plain-events-container">
         <Helmet title={title} />
         <GoogleMapsWrapper
           googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAP_KEY}&libraries=geometry,drawing,places`} // libraries=geometry,drawing,places
-          loadingElement={<div style={{ height: `100%`, width: `100%` }} >LOADING</div>}
-          containerElement={<div style={{ height: `95vh`, width: `100vw` }} >CONTAINER</div>}
+          loadingElement={<div style={{ height: `100%`, width: `100%` }}></div>}
+          containerElement={<div style={{ width: `100%` }} >CONTAINER</div>}
           mapElement={<div style={{ height: `0`, width: `0`}} >MAP</div>}
         >
           <PlainEventSearchControls
@@ -219,8 +219,9 @@ class PlainEvents extends React.Component {
             ordering={this.state.ordering}
             limit={this.state.limit}
             onSubmit={this.getEvents.bind(this)}
+            placeName={this.state.placeName}
+            customRefs={this.customRefs}
           />
-          {this.state.placeName ? <h1>{title}</h1> : null}
           <PlainEventList events={this.state.events} />
           <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>
         </GoogleMapsWrapper>

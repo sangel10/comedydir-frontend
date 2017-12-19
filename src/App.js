@@ -16,7 +16,7 @@ if (process.env.REACT_APP_GOOGLE_ANALYTICS_ID) {
 const ComedyDirectoryApp = () => (
   <div className="app-container" id="app-container">
     <header>
-      <a href="/">Find Live Comedy</a> - <small>Made by <a href="//twitter.com/nuclearYolocst" target="_blank" rel="noopener noreferrer">Santiago Angel</a></small>
+      <a href="/">Find Live Comedy</a><small className="made-by"> - Made by <a href="//twitter.com/nuclearYolocst" target="_blank" rel="noopener noreferrer">Santiago Angel</a></small>
     </header>
     <div className="menu-container">
       <Menu>
