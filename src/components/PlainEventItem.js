@@ -29,7 +29,7 @@ class PlainEventItem extends React.Component {
         <div>{moment(this.props.event.start_time).format("h:mma")}</div>
         <div>{moment(this.props.event.start_time).format("dddd, MMMM Do YYYY")}</div>
         <div>
-          <a target="_blank" href={`//www.google.com/maps/search/?api=1&query="${this.props.event.facebook_place.facebook_name} ${this.props.event.facebook_place.facebook_street} ${this.props.event.facebook_place.facebook_city} ${this.props.event.facebook_place.facebook_country}"`}>
+          <a target="_blank" rel="noopener noreferrer" href={`//www.google.com/maps/search/?api=1&query="${this.props.event.facebook_place.facebook_name} ${this.props.event.facebook_place.facebook_street} ${this.props.event.facebook_place.facebook_city} ${this.props.event.facebook_place.facebook_country}"`}>
             <div>{this.props.event.facebook_place.facebook_name}</div>
             {this.props.event.facebook_place.facebook_street}, {this.props.event.facebook_place.facebook_city}
           </a>
@@ -42,7 +42,7 @@ class PlainEventItem extends React.Component {
             <p>
               {this.props.event.description}
             </p>
-            {this.props.event.facebook_id ? <a target="_blank" href={`//facebook.com/${this.props.event.facebook_id}`}>See event on Facebook</a> : null}
+            {this.props.event.facebook_id ? <a target="_blank" rel="noopener noreferrer" href={`//facebook.com/${this.props.event.facebook_id}`}>See event on Facebook</a> : null}
           </div>
         }
       </div>

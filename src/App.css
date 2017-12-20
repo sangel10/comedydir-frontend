@@ -1279,3 +1279,7 @@ header {
 @media (max-width: 400px) {
   .made-by {
     display: none; } }
+
+@media (max-width: 450px) {
+  button {
+    width: 100%; } }

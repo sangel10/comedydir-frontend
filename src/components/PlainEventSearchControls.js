@@ -67,7 +67,8 @@ class PlainEventSearchControls extends React.Component {
           Use My Location
         </button>
         <button type="submit" value="search" onClick={this.props.onSubmit.bind(this)}>Search</button>
-        <a id="newsletter" target="_blank" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true"><button>Get Notified!</button></a>
+        <a id="newsletter" target="_blank" rel="noopener noreferrer" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true"><button>Get Notified!</button></a>
+        <button onClick={()=>{window.prompt("Share these results", this.props.shareUrl)}}>Share</button>
         {this.props.eventSlug ? null :
           <h6 onClick={this.state.toggleAdvanceSearchControls} className="pointer">
             {this.state.areAdvancedSearchControlsVisible ? <span className="underlined">Hide Search Options</span> : searchOptionsString }
@@ -129,4 +130,5 @@ PlainEventSearchControls.propTypes = {
   placeName: PropTypes.string,
   customRefs: PropTypes.object,
   eventSlug: PropTypes.string,
+  shareUrl: PropTypes.string,
 }

@@ -29,6 +29,7 @@ class PlainEvents extends React.Component {
       radius: 10,
       days: 14,
       page: 1,
+      shareUrl: null,
       ordering: 'start_time',
       limit: 50,
       loadingMessage: "Loading...",
@@ -62,13 +63,34 @@ class PlainEvents extends React.Component {
   }
 
   componentDidMount() {
-    if (!this.props.match.params.eventSlug) {
-      this.getUserLocation()
+    if (this.props.match.params.eventSlug) {
+      return
     }
+    const params = queryString.parse(window.location.search)
+    const nextState = {}
+    if (!params.latitude || !params.longitude) {
+      this.getUserLocation()
+      return
+    }
+
+    nextState.center = {
+      lat: parseFloat(params.latitude, 10),
+      lng: parseFloat(params.longitude, 10),
+    }
+    nextState.page = parseInt(params.page, 10) || undefined
+    nextState.days = parseInt(params.days, 10) || undefined
+    nextState.radius = parseFloat(params.radius) || undefined
+    nextState.ordering = params.ordering || undefined
+    nextState.startTime = params.start_time ? moment.unix(parseInt(params.start_time, 10)) : undefined
+    nextState.placeName = params.place_name || undefined
+    const cleanNextState = _.omitBy(nextState, _.isUndefined)
+    console.log('parsed time', params.start_time, moment.unix(parseInt(params.start_time, 10)))
+    this.setState(cleanNextState)
+    // this.getEvents(params.latitude, params.longitude)
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const valuesToWatch = ['center', 'startTime', 'radius', 'days', 'ordering' ]
+    const valuesToWatch = ['center', 'startTime', 'radius', 'days', 'ordering', "page"]
     for (const value of valuesToWatch) {
       if (this.state[value] !== prevState[value]) {
         this.getEvents()
@@ -189,11 +211,12 @@ class PlainEvents extends React.Component {
         console.log(error)
       })
 
-    let locationParams = _.pick(queryParams, 'latitude', 'longitude')
+    let locationParams = queryParams
     locationParams.place_name = this.state.placeName || undefined
     locationParams = queryString.stringify(locationParams)
     // window.history.pushState({}, "", `/events?${locationParams}`)
-    this.props.history.push(`/plain?${locationParams}`)
+    // this.props.history.push(`/plain?${locationParams}`)
+    this.setState({shareUrl: `${window.location.host}/plain?${locationParams}`})
     // <Redirect to={`/events?${locationParams}`} />
   }
 
@@ -244,6 +267,7 @@ class PlainEvents extends React.Component {
             placeName={this.state.placeName}
             customRefs={this.customRefs}
             eventSlug={this.props.match.params.eventSlug}
+            shareUrl={this.state.shareUrl}
           />
           <Switch>
             <Route exact path="/plain/" render={()=> <PlainEventList events={this.state.events}/>}/>

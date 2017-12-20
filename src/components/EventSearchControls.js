@@ -56,6 +56,10 @@ class EventSearchControls extends React.Component {
           onClick={this.props.getUserLocation.bind(this)}>
           Use My Location
         </button>
+        <button className=""
+          onClick={this.props.getUserLocation.bind(this)}>
+          Share
+        </button>
         <h6 onClick={this.state.toggleAdvanceSearchControls} className="pointer">
           {this.state.areAdvancedSearchControlsVisible ? "Hide Search Options" : "Search Search Options"}
         </h6>
