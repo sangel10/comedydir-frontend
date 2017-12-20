@@ -4,15 +4,18 @@ import PlainEventItem from './PlainEventItem'
 
 class PlainEventList extends React.Component {
 
+  renderEvents() {
+    return this.props.events.map((event) => {
+      return <PlainEventItem key={event.pk} event={event} isExpanded={false}/>
+    })
+  }
+
 
   render() {
+    const events = this.renderEvents()
     return (
       <div>
-        {
-          this.props.events.map((event) => {
-            return <PlainEventItem key={event.pk} event={event} isExpanded={false}/>
-          })
-        }
+        {this.props.events.length ? events: <span>No events found, try another search or <a href="//www.facebook.com/groups/1814445198866527/">add an event</a></span> }
       </div>
     )
   }

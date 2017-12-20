@@ -121,7 +121,10 @@ class PlainEvents extends React.Component {
         })
         this.getLocationFromCoordinates(pos.lat, pos.lng)
         // this.getEvents(parseFloat(pos.lat, 10), parseFloat(pos.lng, 10))
-      }, () => {
+      }, (e) => {
+        console.log(e)
+        this.setState({loading: false, loadingMessage: "Finding your location"})
+
         // handleLocationError(true, infoWindow, map.getCenter());
       })
     }
@@ -139,15 +142,27 @@ class PlainEvents extends React.Component {
     return {lat: lat, lng: lng}
   }
 
-  getEvents(latitude, longitude) {
-    if ((!latitude || !latitude) && (!this.state.center.lat || !this.state.center.lat)) {
-      this.getUserLocation()
+  refreshEvents() {
+    if (this.state.center.lat && this.state.center.lng) {
+      this.getEvents()
+      return
     }
+    this.getUserLocation()
+  }
+
+  getEvents(latitude, longitude) {
+    // console.log('get events');
+    // if ((!latitude || !latitude) && (!this.state.center.lat || !this.state.center.lat)) {
+    //   this.getUserLocation()
+    //   return
+    // }
     this.setState({loading: true, loadingMessage: `Find Events Near ${this.state.placeName}`})
     const baseUrl = `${process.env.REACT_APP_BACKEND_API_URL}/events/events/`
     const queryParams={}
     const {lat, lng} = this.getCenterAsValues(latitude, longitude)
     if (!lat || !lng) {
+      this.setState({loading: false})
+      // this.getUserLocation()
       return
     }
     queryParams.radius = this.state.radius || undefined
@@ -204,7 +219,6 @@ class PlainEvents extends React.Component {
 
   render() {
     const title = this.state.placeName ? `Comedy events near: ${this.state.placeName}` : 'findlivecomedy.com'
-    console.log('prop', this.props.match)
     return (
       <div className="plain-events-container">
         <Helmet title={title} />
@@ -226,7 +240,7 @@ class PlainEvents extends React.Component {
             days={this.state.days}
             ordering={this.state.ordering}
             limit={this.state.limit}
-            onSubmit={this.getEvents.bind(this)}
+            onSubmit={this.refreshEvents.bind(this)}
             placeName={this.state.placeName}
             customRefs={this.customRefs}
             eventSlug={this.props.match.params.eventSlug}

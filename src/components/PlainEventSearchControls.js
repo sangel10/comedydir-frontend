@@ -66,7 +66,7 @@ class PlainEventSearchControls extends React.Component {
           onClick={this.props.getUserLocation.bind(this)}>
           Use My Location
         </button>
-        <button type="submit" value="search" onClick={this.props.onSubmit.bind(this)}>Refresh</button>
+        <button type="submit" value="search" onClick={this.props.onSubmit.bind(this)}>Search</button>
         <a id="newsletter" target="_blank" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true"><button>Get Notified!</button></a>
         {this.props.eventSlug ? null :
           <h6 onClick={this.state.toggleAdvanceSearchControls} className="pointer">
