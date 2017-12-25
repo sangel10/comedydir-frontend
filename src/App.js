@@ -2,6 +2,7 @@ import React from 'react' // eslint-disable-line no-unused-vars
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom'
 import Main from './components/Main'
 import PlainEvents from './components/PlainEvents'
+import PageList from './components/PageList'
 import { slide as Menu } from 'react-burger-menu'
 
 import './App.css'
@@ -31,6 +32,7 @@ const ComedyDirectoryApp = () => (
         <Switch>
           <Route path="/events/:eventSlug?" component={Main}/>
           <Route path="/plain/:eventSlug?" component={PlainEvents}/>
+          <Route exact path="/pages/" component={PageList}/>
           <Route path="/">
             <Redirect to="/plain"/>
           </Route>
