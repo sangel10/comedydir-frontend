@@ -2,9 +2,7 @@ import React from 'react'
 import axios from 'axios'
 import queryString from 'query-string'
 import _ from 'lodash'
-import ReactPaginate from 'react-paginate'
 import LoadingSpinner from './LoadingSpinner'
-import PageControl from './PageControl'
 
 class PageList extends React.Component {
 
@@ -93,11 +91,6 @@ class PageList extends React.Component {
         <div>{this.state.pages.length ? `${this.state.pages.length} pages found` : "No pages found, try changing your search"}</div>
         <br/>
         {pages}
-        <PageControl
-          hasNextPage={this.state.hasNextPage}
-          hasPreviousPage={this.state.hasPreviousPage}
-          onClick={this.state.onPageChange.bind(this)}
-        />
         <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>
       </div>
     )
