@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-d
 import Main from './components/Main'
 import PlainEvents from './components/PlainEvents'
 import PageList from './components/PageList'
+import Contact from './components/Contact'
 import { slide as Menu } from 'react-burger-menu'
 
 import './App.css'
@@ -21,10 +22,11 @@ const ComedyDirectoryApp = () => (
     </header>
     <div className="menu-container">
       <Menu>
+        <a id="home" className="menu-item" href="/">Home</a>
         <a id="about" className="menu-item" href="/about">About</a>
-        <a id="add-shows" className="menu-item" href="//www.facebook.com/groups/1814445198866527/">Add A Show</a>
-        <a id="newsletter" target="_blank" rel="noopener noreferrer" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true">Get E-mail Notification About Shows Near You</a>
-        <a id="support" className="menu-item" href="/support">Support</a>
+        <a id="add-a-show" href="/pages/">Add A Show</a>
+        <a id="newsletter" target="_blank" rel="noopener noreferrer" className="menu-item" href="//docs.google.com/forms/d/1Q3yJYQc6uA2NdBBog2RYYj-jAlBi6CnvUnSh9WP3YBg/viewform?edit_requested=true">Get E-mail Notifications About Shows Near You</a>
+        <a id="contact" className="menu-item" href="/contact">Support / Contact / etc.</a>
       </Menu>
     </div>
     <Router>
@@ -32,6 +34,7 @@ const ComedyDirectoryApp = () => (
         <Switch>
           <Route path="/events/:eventSlug?" component={Main}/>
           <Route path="/plain/:eventSlug?" component={PlainEvents}/>
+          <Route exact path="/contact/" component={Contact}/>
           <Route exact path="/pages/" component={PageList}/>
           <Route path="/">
             <Redirect to="/plain"/>
