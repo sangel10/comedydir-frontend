@@ -105,6 +105,11 @@ class PlainEvents extends React.Component {
         break
       }
     }
+    // TODO: This is ineffient, if the search params have changed we go through another
+    // entire lifecycle to reset the page to 1, but that means we make a potentially costly
+    // DB call with the wrong page.
+    // I'm leaving this in as it only happens when people are on pages >1, which is rare right now
+    // But could potentially cause problems later
     if (this.state.page !== prevState.page) {
       this.getEvents()
     }
