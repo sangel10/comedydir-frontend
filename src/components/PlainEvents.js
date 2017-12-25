@@ -9,6 +9,7 @@ import LoadingSpinner from './LoadingSpinner'
 import Helmet from 'react-helmet'
 import PlainEventSearchControls from './PlainEventSearchControls'
 import PlainEventDetail from './PlainEventDetail'
+import PageControl from './PageControl'
 import { Route, Switch } from 'react-router-dom'
 
 const GoogleMapsWrapper = withScriptjs(withGoogleMap(props => {
@@ -29,9 +30,12 @@ class PlainEvents extends React.Component {
       radius: 10,
       days: 14,
       page: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
       shareUrl: null,
       ordering: 'start_time',
       limit: 50,
+      totalEvents: 0,
       loadingMessage: "Loading...",
       onSearchBoxMounted: ref => {
         this.customRefs.searchBox = ref
@@ -58,6 +62,9 @@ class PlainEvents extends React.Component {
           placeName: places[0].formatted_address,
         })
         this.getEvents(nextCenter.lat(), nextCenter.lng())
+      },
+      onPageChange(change) {
+        this.setState({page: (this.state.page + change)})
       }
     }
   }
@@ -90,12 +97,16 @@ class PlainEvents extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const valuesToWatch = ['center', 'startTime', 'radius', 'days', 'ordering', "page"]
+    const valuesToWatch = ['center', 'startTime', 'radius', 'days', 'ordering']
     for (const value of valuesToWatch) {
       if (this.state[value] !== prevState[value]) {
+        this.setState({page: 1})
         this.getEvents()
         break
       }
+    }
+    if (this.state.page !== prevState.page) {
+      this.getEvents()
     }
   }
 
@@ -201,10 +212,16 @@ class PlainEvents extends React.Component {
         this.setState({
           events: response.data.results,
           hasNextPage: response.data.next !== null,
+          hasPreviousPage: response.data.previous !== null,
           totalEvents: response.data.count
         })
         // this.state.getLocationFromEvents()
         this.setState({loading: false})
+        window.scrollTo({
+          'behavior': 'smooth',
+          'top': 0,
+          'speed': 50,
+        })
       })
       .catch(error=> {
         this.setState({loading: false})
@@ -239,7 +256,6 @@ class PlainEvents extends React.Component {
     this.setState(obj)
   }
 
-
   render() {
     const title = this.state.placeName ? `Comedy events near: ${this.state.placeName}` : 'findlivecomedy.com'
     return (
@@ -270,7 +286,15 @@ class PlainEvents extends React.Component {
             shareUrl={this.state.shareUrl}
           />
           <Switch>
-            <Route exact path="/plain/" render={()=> <PlainEventList events={this.state.events}/>}/>
+            <Route exact path="/plain/" render={()=>
+              (<div>
+                <PlainEventList events={this.state.events} totalEvents={this.state.totalEvents}/>
+                <PageControl
+                  hasNextPage={this.state.hasNextPage}
+                  hasPreviousPage={this.state.hasPreviousPage}
+                  onClick={this.state.onPageChange.bind(this)}
+                />
+              </div>)}/>
             <Route path="/plain/:eventSlug" render={()=><PlainEventDetail eventSlug={this.props.match.params.eventSlug}/>}/>
           </Switch>
           <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>

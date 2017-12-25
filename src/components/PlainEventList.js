@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import PlainEventItem from './PlainEventItem'
+import PageControl from './PageControl'
 
 class PlainEventList extends React.Component {
 
@@ -25,4 +26,9 @@ export default PlainEventList
 
 PlainEventList.propTypes = {
   events: PropTypes.array.isRequired,
+  // totalPages: PropTypes.number,
+  // limit: PropTypes.number,
+  // currentPage: PropTypes.number,
+  // hasNextPage: PropTypes.bool.isRequired,
+  // onPageControlClick: PropTypes.func.isRequired,
 }

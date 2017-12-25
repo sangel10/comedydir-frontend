@@ -2,7 +2,9 @@ import React from 'react'
 import axios from 'axios'
 import queryString from 'query-string'
 import _ from 'lodash'
+import ReactPaginate from 'react-paginate'
 import LoadingSpinner from './LoadingSpinner'
+import PageControl from './PageControl'
 
 class PageList extends React.Component {
 
@@ -12,10 +14,16 @@ class PageList extends React.Component {
     this.state = {
       loading: false,
       pages: [],
-      hasNextPage: null,
-      totalEvents: null,
+      hasNextPage: false,
+      hasPreviousPage: false,
+      totalPages: null,
+      limit: 50,
+      page: 1,
       search: '',
-      loadingMessage: 'Searching Facebook pages'
+      loadingMessage: 'Searching Facebook pages',
+      onPageChange(change) {
+        this.setState({page: (this.state.page + change)})
+      }
     }
   }
 
@@ -25,6 +33,10 @@ class PageList extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (this.state.search !== prevState.search) {
+      this.setState({page: 1})
+      this.getPages()
+    }
+    if (this.state.page !== prevState.page) {
       this.getPages()
     }
   }
@@ -34,6 +46,7 @@ class PageList extends React.Component {
     const baseUrl = `${process.env.REACT_APP_BACKEND_API_URL}/events/pages/`
     const queryParams={}
     queryParams.search = this.state.search || undefined
+    queryParams.page = this.state.page || 1
     const params = queryString.stringify(queryParams)
     const url = `${baseUrl}?${params}`
     axios.get(url)
@@ -41,7 +54,8 @@ class PageList extends React.Component {
         this.setState({
           pages: response.data.results,
           hasNextPage: response.data.next !== null,
-          totalEvents: response.data.count
+          hasPreviousPage: response.data.previous !== null,
+          totalPages: response.data.count
         })
         // this.state.getLocationFromEvents()
         this.setState({loading: false})
@@ -50,11 +64,6 @@ class PageList extends React.Component {
         this.setState({loading: false})
         console.log(error)
       })
-
-    let locationParams = queryParams
-    locationParams.place_name = this.state.placeName || undefined
-    locationParams = queryString.stringify(locationParams)
-    this.setState({shareUrl: `${window.location.host}/plain?${locationParams}`})
   }
 
   onChange(event) {
@@ -84,6 +93,11 @@ class PageList extends React.Component {
         <div>{this.state.pages.length ? `${this.state.pages.length} pages found` : "No pages found, try changing your search"}</div>
         <br/>
         {pages}
+        <PageControl
+          hasNextPage={this.state.hasNextPage}
+          hasPreviousPage={this.state.hasPreviousPage}
+          onClick={this.state.onPageChange.bind(this)}
+        />
         <div>{this.state.loading ? <LoadingSpinner message={this.state.loadingMessage}/> : null}</div>
       </div>
     )
