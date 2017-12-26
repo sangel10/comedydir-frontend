@@ -4,6 +4,7 @@ import Main from './components/Main'
 import PlainEvents from './components/PlainEvents'
 import PageList from './components/PageList'
 import Contact from './components/Contact'
+import CitiesIndex from './components/CitiesIndex'
 import { slide as Menu } from 'react-burger-menu'
 
 import './App.css'
@@ -34,6 +35,7 @@ const ComedyDirectoryApp = () => (
         <Switch>
           <Route path="/events/:eventSlug?" component={Main}/>
           <Route path="/plain/:eventSlug?" component={PlainEvents}/>
+          <Route exact path="/index/" component={CitiesIndex}/>
           <Route exact path="/contact/" component={Contact}/>
           <Route exact path="/pages/" component={PageList}/>
           <Route path="/">

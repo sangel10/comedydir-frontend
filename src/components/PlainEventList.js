@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import PlainEventItem from './PlainEventItem'
-import PageControl from './PageControl'
 
 class PlainEventList extends React.Component {
 

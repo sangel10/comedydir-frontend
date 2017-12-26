@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import PlainEventItem from './PlainEventItem'
 import axios from 'axios'
 
-class Detail extends React.Component {
+class PlainEventDetail extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -37,8 +37,8 @@ class Detail extends React.Component {
   }
 }
 
-export default Detail
+export default PlainEventDetail
 
-Detail.propTypes = {
+PlainEventDetail.propTypes = {
   eventSlug: PropTypes.string.isRequired,
 }
